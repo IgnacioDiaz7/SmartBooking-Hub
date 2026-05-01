@@ -68,16 +68,12 @@ h1, h2, .navbar-brand {
 }
 /* Estilo Luxury para el Modal */
 .modal-luxury .modal-content {
-    border-radius: 0; /* Bordes rectos para mayor elegancia */
+    border-radius: 0;
     background-color: #ffffff;
     border: 1px solid #e0e0e0;
 }
 
-/* Pestañas (Pills) estilo Minimalista */
-.nav-luxury {
-    border-bottom: 1px solid #f1f1f1;
-}
-
+/* Pestañas (Pills) Minimalistas */
 .nav-luxury .nav-link {
     color: #999;
     font-family: 'Montserrat', sans-serif;
@@ -96,7 +92,7 @@ h1, h2, .navbar-brand {
     border-bottom: 2px solid var(--primary-blue);
 }
 
-/* Inputs refinados */
+/* Inputs Refinados */
 .form-luxury .form-control {
     border-radius: 0;
     border: none;
@@ -117,5 +113,22 @@ h1, h2, .navbar-brand {
     letter-spacing: 1px;
     font-size: 0.65rem;
     font-weight: 700;
+    color: #999;
+}
+
+/* Selector de Perfil Dinámico */
+.custom-option input:checked + label {
+    background-color: var(--primary-blue) !important;
+    color: white !important;
+    border-color: var(--primary-blue) !important;
+}
+
+.custom-option label {
+    border-radius: 0;
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: 0.3s;
+    border: 1px solid #e0e0e0;
     color: #999;
 }
