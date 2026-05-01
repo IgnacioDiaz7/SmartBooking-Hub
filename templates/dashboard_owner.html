@@ -1,0 +1,131 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Administrativo | SmartBooking HUB</title>
+    <link rel="icon" type="image/png" href="{% static 'img/logo.png' %}">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- CSS Separados -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <aside class="sidebar d-flex flex-column shadow">
+        <div class="logo-container text-center">
+            <a href="{% url 'home' %}">
+                <img src="{% static 'img/logo.png' %}" alt="SmartBooking HUB" class="logo-white">
+            </a>
+        </div>
+
+        <nav class="nav flex-column gap-3 px-4">
+            <!-- Los enlaces se mantienen igual, pero con un padding lateral -->
+            <a class="nav-link text-white fw-bold small" href="#">RESUMEN</a>
+            <a class="nav-link text-white-50 small" href="#">CALENDARIO</a>
+            <a class="nav-link text-white-50 small" href="#">COLABORADORES</a>
+            <a class="nav-link text-white-50 small" href="#">REPORTES BI</a>
+        </nav>
+
+        <div class="mt-auto">
+            <a href="{% url 'home' %}" class="btn btn-outline-light btn-sm w-100 rounded-0">Cerrar Sesión</a>
+        </div>
+    </aside>
+
+    <!-- Contenido Principal -->
+    <main class="main-content">
+        <header class="d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <h2 class="fw-bold mb-0">Panel de Gestión</h2>
+                <p class="text-muted small">Bienvenido al control operativo de su negocio</p>
+            </div>
+            <div class="text-end">
+                <span class="badge bg-white text-dark shadow-sm p-3 border fw-normal">
+                    <strong class="text-primary">Administrador:</strong> Ignacio Díaz
+                </span>
+            </div>
+        </header>
+
+        <!-- KPI Cards (Prioridades detectadas en encuesta) -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="card kpi-card p-4 shadow-sm bg-white h-100">
+                    <p class="text-muted small fw-bold mb-1">INGRESOS DEL MES</p>
+                    <h3 class="fw-bold">$1.250.000</h3>
+                    <span class="text-success small fw-semibold">↑ 12% vs mes anterior</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card kpi-card p-4 shadow-sm bg-white h-100" style="border-left-color: var(--primary-blue);">
+                    <p class="text-muted small fw-bold mb-1">CLIENTES TOTALES</p>
+                    <h3 class="fw-bold">148</h3>
+                    <span class="text-muted small">Métrica basada en registros reales</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card kpi-card p-4 shadow-sm bg-white h-100">
+                    <p class="text-muted small fw-bold mb-1 text-danger">ALERTA INASISTENCIAS</p>
+                    <h3 class="fw-bold">4</h3>
+                    <span class="text-muted small">Evite pérdidas monetarias este mes</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fila de Datos BI -->
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="card card-luxury shadow-sm p-4 h-100 bg-white">
+                    <h5 class="fw-bold mb-4">Próximas Citas Agendadas</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Cliente</th>
+                                    <th>Servicio</th>
+                                    <th>Horario</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="fw-bold">Ignacio Díaz</td>
+                                    <td class="text-muted">Corte de Barba Premium</td>
+                                    <td>14:30 hrs</td>
+                                    <td><span class="badge bg-primary-subtle text-primary px-3">Confirmado</span></td>
+                                </tr>
+                                <!-- Más registros dinámicos aquí -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card card-luxury shadow-sm p-4 h-100 bg-dark text-white">
+                    <h5 class="fw-bold mb-4">Objetivo Comercial</h5>
+                    <div class="text-center py-4">
+                        <div class="display-3 fw-bold text-accent">85%</div>
+                        <p class="text-white-50 mt-2">Progreso hacia la meta de ingresos mensual</p>
+                    </div>
+                    <div class="progress rounded-0 bg-secondary" style="height: 10px;">
+                        <div class="progress-bar bg-primary" style="width: 85%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

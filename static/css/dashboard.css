@@ -1,0 +1,82 @@
+/* Variables de color consistentes con SmartBooking HUB */
+:root {
+    --primary-blue: #0A2647;
+    --accent-orange: #F58220;
+    --soft-bg: #f4f7f6;
+    --sidebar-width: 250px;
+}
+
+body { 
+    background-color: var(--soft-bg); 
+    font-family: 'Inter', sans-serif;
+}
+
+/* Sidebar Estilizado */
+.sidebar { 
+    height: 100vh; 
+    width: var(--sidebar-width); 
+    position: fixed; 
+    background: var(--primary-blue); 
+    color: white; 
+    transition: all 0.3s;
+}
+
+.sidebar .nav-link {
+    transition: 0.3s;
+    border-radius: 4px;
+}
+
+.sidebar .nav-link:hover {
+    background: rgba(255,255,255,0.1);
+    color: white !important;
+}
+
+/* Ajustes para el logo en el sidebar */
+.sidebar .logo-container {
+    padding: 30px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.05); /* Línea sutil divisoria */
+    margin-bottom: 20px;
+}
+
+.logo-white {
+    filter: brightness(0) invert(1);
+    height: 150px; /* Aumentamos el tamaño considerablemente */
+    width: auto;
+    transition: transform 0.3s ease;
+}
+
+.logo-white:hover {
+    transform: scale(1.10); /* Efecto sutil al pasar el mouse */
+}
+
+/* Contenido Principal */
+.main-content { 
+    margin-left: var(--sidebar-width); 
+    padding: 40px; 
+}
+
+/* Tarjetas KPI (Basadas en encuesta) */
+.kpi-card { 
+    border: none; 
+    border-radius: 0; 
+    border-left: 4px solid var(--accent-orange); 
+    transition: 0.3s; 
+}
+
+.kpi-card:hover { 
+    transform: translateY(-5px); 
+    box-shadow: 0 10px 20px rgba(0,0,0,0.05); 
+}
+
+/* Tablas y Cards */
+.card-luxury {
+    border: none;
+    border-radius: 0;
+}
+
+.table thead th {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #999;
+}
