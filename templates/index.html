@@ -1,0 +1,211 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartBooking Hub - Inicio</title>
+
+    <link rel="icon" type="image/png" href="{% static 'img/logo.png' %}">
+
+    <!-- Google Fonts: Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- CSS Personalizado -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+        <div class="container-fluid px-4">
+
+            <!-- 1. Logo (Extremo Izquierdo) -->
+            <a class="navbar-brand" href="{% url 'home' %}">
+                <img src="{% static 'img/logo.png' %}" alt="SmartBooking HUB" height="100" class="py-1">
+            </a>
+
+            <!-- Botón de menú para celulares -->
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Contenedor de Enlaces y Botones -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+
+                <!-- 2. Enlaces (Centro) -->
+                <!-- La clase 'mx-auto' aplica márgenes automáticos a los lados, forzando el centrado -->
+                <ul class="navbar-nav mx-auto fw-semibold">
+                    <li class="nav-item"><a class="nav-link active" href="{% url 'home' %}">Inicio</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Características</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Planes</a></li>
+                </ul>
+
+                <!-- 3. Botones (Extremo Derecho) -->
+                <div class="d-flex">
+                    <!-- Botón Iniciar Sesión (Abre pestaña de Login) -->
+                    <button class="btn btn-outline-primary btn-sm me-2 fw-semibold" data-bs-toggle="modal"
+                        data-bs-target="#authModal" onclick="document.getElementById('pills-login-tab').click();">
+                        Iniciar Sesión
+                    </button>
+                    <!-- Botón Registrarse (Abre pestaña de Registro) -->
+                    <button class="btn btn-primary btn-sm fw-semibold" data-bs-toggle="modal"
+                        data-bs-target="#authModal" onclick="document.getElementById('pills-register-tab').click();">
+                        Registrarse
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section d-flex align-items-center">
+        <div class="container text-center">
+            <h1 class="display-4 fw-bold text-dark mb-4">Gestiona tu estética de forma <span
+                    class="text-primary">inteligente</span></h1>
+            <p class="lead text-secondary mb-5 mx-auto" style="max-width: 700px;">
+                Centraliza tu agenda, automatiza recordatorios y toma decisiones basadas en datos. La plataforma
+                definitiva para llevar el control total de tu negocio.
+            </p>
+            <div>
+                <a href="#" class="btn btn-primary btn-lg px-5 py-3 me-3 fw-bold shadow-sm rounded-pill">Comienza
+                    Gratis</a>
+                <a href="#" class="btn btn-outline-dark btn-lg px-5 py-3 fw-bold rounded-pill">Agendar Demo</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección de Características -->
+    <section class="py-5 bg-light">
+        <div class="container my-5">
+            <div class="row g-4 text-center">
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm feature-card p-4">
+                        <h4 class="fw-bold text-primary mb-3">Agenda Digital</h4>
+                        <p class="text-muted">Despídete del papel. Controla las reservas, inasistencias y tiempos
+                            muertos en tiempo real desde cualquier dispositivo.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm feature-card p-4">
+                        <h4 class="fw-bold text-warning mb-3">Automatización</h4>
+                        <p class="text-muted">Reduce las inasistencias con recordatorios automáticos y mantén a tu
+                            equipo de trabajo siempre sincronizado.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm feature-card p-4">
+                        <h4 class="fw-bold text-primary mb-3">Análisis de Datos</h4>
+                        <p class="text-muted">Visualiza ingresos, servicios más solicitados y rendimiento del personal
+                            para tomar mejores decisiones.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Modal de Autenticación (Login / Registro) -->
+    <div class="modal fade" id="authModal" tabindex="-1" aria-labelledby="authModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+
+                <!-- Cabecera del Modal con las pestañas -->
+                <div class="modal-header border-0 pb-0">
+                    <ul class="nav nav-pills w-100 mb-3" id="pills-tab" role="tablist">
+                        <li class="nav-item w-50 text-center" role="presentation">
+                            <button class="nav-link active w-100 fw-bold" id="pills-login-tab" data-bs-toggle="pill"
+                                data-bs-target="#pills-login" type="button" role="tab" aria-controls="pills-login"
+                                aria-selected="true">Iniciar Sesión</button>
+                        </li>
+                        <li class="nav-item w-50 text-center" role="presentation">
+                            <button class="nav-link w-100 fw-bold" id="pills-register-tab" data-bs-toggle="pill"
+                                data-bs-target="#pills-register" type="button" role="tab" aria-controls="pills-register"
+                                aria-selected="false">Registrarse</button>
+                        </li>
+                    </ul>
+                    <!-- Botón X para cerrar -->
+                    <button type="button" class="btn-close position-absolute top-0 end-0 m-3" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+
+                <!-- Cuerpo del Modal (Los Formularios) -->
+                <div class="modal-body px-4 pb-4">
+                    <div class="tab-content" id="pills-tabContent">
+
+                        <!-- Pestaña: Iniciar Sesión -->
+                        <div class="tab-pane fade show active" id="pills-login" role="tabpanel"
+                            aria-labelledby="pills-login-tab">
+                            <div class="text-center mb-4">
+                                <h5 class="fw-bold">¡Bienvenido de nuevo!</h5>
+                                <p class="text-muted small">Ingresa a tu cuenta de SmartBooking HUB</p>
+                            </div>
+                            <form>
+                                <div class="mb-3">
+                                    <label for="loginEmail" class="form-label text-secondary small fw-semibold">Correo
+                                        Electrónico</label>
+                                    <input type="email" class="form-control" id="loginEmail"
+                                        placeholder="correo@tuempresa.com" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="loginPassword"
+                                        class="form-label text-secondary small fw-semibold">Contraseña</label>
+                                    <input type="password" class="form-control" id="loginPassword"
+                                        placeholder="••••••••" required>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="rememberMe">
+                                        <label class="form-check-label small text-muted"
+                                            for="rememberMe">Recordarme</label>
+                                    </div>
+                                    <a href="#" class="text-primary small text-decoration-none">¿Olvidaste tu
+                                        contraseña?</a>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100 fw-bold py-2">Ingresar</button>
+                            </form>
+                        </div>
+
+                        <!-- Pestaña: Registrarse -->
+                        <div class="tab-pane fade" id="pills-register" role="tabpanel"
+                            aria-labelledby="pills-register-tab">
+                            <div class="text-center mb-4">
+                                <h5 class="fw-bold">Crea tu cuenta</h5>
+                                <p class="text-muted small">Únete a la gestión inteligente</p>
+                            </div>
+                            <form>
+                                <div class="mb-3">
+                                    <label for="registerName" class="form-label text-secondary small fw-semibold">Nombre
+                                        Completo</label>
+                                    <input type="text" class="form-control" id="registerName" placeholder="Tu nombre"
+                                        required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="registerEmail"
+                                        class="form-label text-secondary small fw-semibold">Correo Electrónico</label>
+                                    <input type="email" class="form-control" id="registerEmail"
+                                        placeholder="correo@tuempresa.com" required>
+                                </div>
+                                <div class="mb-4">
+                                    <label for="registerPassword"
+                                        class="form-label text-secondary small fw-semibold">Contraseña</label>
+                                    <input type="password" class="form-control" id="registerPassword"
+                                        placeholder="Crea una contraseña segura" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100 fw-bold py-2">Comenzar ahora</button>
+                            </form>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
