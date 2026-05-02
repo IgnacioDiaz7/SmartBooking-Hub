@@ -150,48 +150,51 @@
                                 <h2 class="h3 mb-2">Nueva Cuenta</h2>
                                 <p class="text-muted small italic">Inicie su transformación digital hoy</p>
                             </div>
-                            <form>
-                                <!-- Selector de Perfil (Basado en encuesta) -->
+
+                            <!-- Agregamos el método POST y la URL de la vista de registro -->
+                            <form method="POST" action="{% url 'registro_dueno' %}">
+                                {% csrf_token %} <!-- Seguridad obligatoria de Django -->
+
+                                <!-- Selector de Perfil -->
                                 <div class="mb-4">
                                     <label class="form-label d-block mb-3 text-center">¿Cómo usará SmartBooking
                                         HUB?</label>
                                     <div class="d-flex gap-3">
                                         <div class="form-check custom-option w-50 p-0">
                                             <input class="form-check-input d-none" type="radio" name="userRole"
-                                                id="roleCliente" checked>
+                                                id="roleCliente" value="client" checked>
                                             <label class="btn btn-outline-secondary btn-sm w-100 fw-bold py-2"
-                                                for="roleCliente">
-                                                Soy Cliente
-                                            </label>
+                                                for="roleCliente">Soy Cliente</label>
                                         </div>
                                         <div class="form-check custom-option w-50 p-0">
                                             <input class="form-check-input d-none" type="radio" name="userRole"
-                                                id="roleOwner">
+                                                id="roleOwner" value="owner">
                                             <label class="btn btn-outline-secondary btn-sm w-100 fw-bold py-2"
-                                                for="roleOwner">
-                                                Soy Dueño
-                                            </label>
+                                                for="roleOwner">Soy Dueño</label>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="mb-4">
                                     <label class="form-label">Nombre Completo</label>
-                                    <input type="text" class="form-control" required>
+                                    <!-- Agregamos name="nombre" para capturarlo en el servidor -->
+                                    <input type="text" name="nombre" class="form-control" required>
                                 </div>
                                 <div class="mb-4">
                                     <label class="form-label">Email de Contacto</label>
-                                    <input type="email" class="form-control" required>
+                                    <!-- Agregamos name="email" -->
+                                    <input type="email" name="email" class="form-control" required>
                                 </div>
                                 <div class="mb-5">
                                     <label class="form-label">Contraseña</label>
-                                    <input type="password" class="form-control" placeholder="Mínimo 8 caracteres"
-                                        required>
+                                    <!-- Agregamos name="password" -->
+                                    <input type="password" name="password" class="form-control"
+                                        placeholder="Mínimo 8 caracteres" required>
                                 </div>
+
                                 <button type="submit" class="btn btn-corp btn-main w-100">Crear Credenciales</button>
                             </form>
                         </div>
-
                     </div>
                 </div>
             </div>
