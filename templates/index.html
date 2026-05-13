@@ -27,18 +27,22 @@
                 <img src="{% static 'img/logo.png' %}" alt="SmartBooking HUB" height="100">
             </a>
 
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
             <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
                 <ul class="navbar-nav gap-4">
-                    <li class="nav-item"><a class="nav-link small fw-bold" href="#">GESTIÓN</a></li>
-                    <li class="nav-item"><a class="nav-link small fw-bold" href="#">ANÁLISIS</a></li>
-                    <li class="nav-item"><a class="nav-link small fw-bold" href="#">SOPORTE</a></li>
+                    <li class="nav-item"><a class="nav-link small fw-bold text-uppercase" href="#gestion">GESTIÓN</a></li>
+                    <li class="nav-item"><a class="nav-link small fw-bold text-uppercase" href="#analisis">ANÁLISIS</a></li>
+                    <li class="nav-item"><a class="nav-link small fw-bold text-uppercase" href="#soporte">SOPORTE</a></li>
                 </ul>
             </div>
 
             <div class="d-flex align-items-center">
                 <button class="btn btn-link text-dark text-decoration-none small fw-bold me-3" data-bs-toggle="modal"
                     data-bs-target="#authModal">LOGIN</button>
-                <button class="btn btn-corp btn-main" data-bs-toggle="modal"
+                <button class="btn btn-main small fw-bold" data-bs-toggle="modal"
                     data-bs-target="#authModal">REGISTRARSE</button>
             </div>
         </div>
@@ -71,35 +75,136 @@
             </div>
         </div>
     </section>
-
-    <!-- Sección de Características -->
-    <section class="py-5 bg-light">
-        <div class="container my-5">
-            <div class="row g-4 text-center">
+   
+    <section id="gestion" class="py-5">
+        <div class="container py-5">
+            <div class="row align-items-center">
+                <div class="col-lg-6 order-lg-2">
+                    <h6 class="text-uppercase fw-bold mb-3" >
+                        Arquitectura de Procesos</h6>
+                    <h2 class="display-5 section-title mb-4">Gestión inteligente de flujos de trabajo.</h2>
+                    <p class="lead text-muted mb-4">Optimice el rendimiento de sus especialistas con herramientas
+                        diseñadas para eliminar la fricción operativa.</p>
+                    <div class="row g-4">
+                        <div class="col-sm-6">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="bi bi-calendar-check fs-4 text-primary me-3"></i>
+                                <span class="fw-bold">Agenda Dinámica</span>
+                            </div>
+                            <p class="small text-muted">Sincronización total entre dispositivos y plataformas.</p>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="bi bi-chat-dots fs-4 text-primary me-3"></i>
+                                <span class="fw-bold">CRM Integrado</span>
+                            </div>
+                            <p class="small text-muted">Historial técnico y preferencias de cada cliente.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 order-lg-1 mt-5 mt-lg-0">
+                    <img src="https://images.unsplash.com/photo-1562322140-8baeececf3df?auto=format&fit=crop&w=800"
+                        class="img-fluid rounded-4 shadow" alt="Gestión Dashboard">
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Sección ANÁLISIS (Data Insights) -->
+    <section id="analisis" class="py-5 bg-light">
+        <div class="container py-5">
+            <div class="text-center mb-5">
+                <h6 class="text-uppercase fw-bold mb-3">Business
+                    Intelligence</h6>
+                <h2 class="display-5 section-title center mb-4">Análisis predictivo de su rentabilidad.</h2>
+            </div>
+            <div class="row g-4">
                 <div class="col-md-4">
                     <div class="card h-100 border-0 shadow-sm feature-card p-4">
-                        <h4 class="fw-bold text-primary mb-3">Agenda Digital</h4>
-                        <p class="text-muted">Despídete del papel. Controla las reservas, inasistencias y tiempos
-                            muertos en tiempo real desde cualquier dispositivo.</p>
+                        <div class="mb-4"><i class="bi bi-pie-chart fs-1 text-primary"></i></div>
+                        <h4 class="fw-bold">KPIs de Rendimiento</h4>
+                        <p class="text-muted">Métricas precisas sobre el ticket promedio, horas pico y servicios de alta
+                            demanda.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-lg feature-card p-4 ">
+                        <div class="mb-4"><i class="bi bi-shield-check fs-1 text-primary"></i></div>
+                        <h4 class="fw-bold">Control de Inventario</h4>
+                        <p class="text-muted">Algoritmos que alertan sobre niveles críticos de stock basándose en el uso
+                            real por servicio.</p>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="card h-100 border-0 shadow-sm feature-card p-4">
-                        <h4 class="fw-bold text-warning mb-3">Automatización</h4>
-                        <p class="text-muted">Reduce las inasistencias con recordatorios automáticos y mantén a tu
-                            equipo de trabajo siempre sincronizado.</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card h-100 border-0 shadow-sm feature-card p-4">
-                        <h4 class="fw-bold text-primary mb-3">Análisis de Datos</h4>
-                        <p class="text-muted">Visualiza ingresos, servicios más solicitados y rendimiento del personal
-                            para tomar mejores decisiones.</p>
+                        <div class="mb-4"><i class="bi bi-cash-stack fs-1 text-primary"></i></div>
+                        <h4 class="fw-bold">Gestión Financiera</h4>
+                        <p class="text-muted">Conciliación automática de pagos y reportes de comisiones listos para
+                            liquidar.</p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
+    <!-- Sección SOPORTE (Contact/Support) -->
+    <section id="soporte" class="py-5">
+        <div class="container py-5">
+            <div class="bg-white rounded-5 shadow-lg overflow-hidden">
+                <div class="row g-0">
+                    <div class="col-lg-5 p-5 text-white d-flex flex-column justify-content-center" style="background-color: #0A2647;">
+                        <h3 class="fw-bold mb-4">Asistencia Técnica Premium</h3>
+                        <p class="opacity-75 mb-5">Nuestro equipo de ingeniería está listo para acompañar su
+                            transformación digital.</p>
+                        <div class="d-flex align-items-center mb-4">
+                            <i class="bi bi-envelope-at fs-3 me-3"></i>
+                            <span>contacto.sbhub@gmail.com</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-headset fs-3 me-3"></i>
+                            <span>+56 9 XXXX XXXX - SmartBooking Sup</span>
+                        </div>
+                    </div>
+                    <div class="col-lg-7 p-5">
+                        <h3 class="fw-bold mb-4">Solicite Asesoría</h3>
+                        <form>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold">Nombre</label>
+                                    <input type="text" class="form-control bg-light border-0 py-3"
+                                        placeholder="Ej: Juan Pérez">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold">Salón/Empresa</label>
+                                    <input type="text" class="form-control bg-light border-0 py-3"
+                                        placeholder="Nombre de su local">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label small fw-bold">Consulta</label>
+                                    <textarea class="form-control bg-light border-0 py-3" rows="4"
+                                        placeholder="¿Cómo podemos ayudarle?"></textarea>
+                                </div>
+                                <div class="col-12">
+                                    <button class="btn btn-main w-100 py-3 mt-3">Enviar Mensaje</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-navy py-5 text-white text-center">
+        <div class="container">
+            <img src="{% static 'img/logo.png' %}" alt="SmartBooking HUB" height="80" class="mb-4 filter-white">
+            <div class="d-flex justify-content-center gap-4 mb-4">
+                <a href="#" class="footer-link">Términos de Servicio</a>
+                <a href="#" class="footer-link">Política de Privacidad</a>
+                <a href="#" class="footer-link">Documentación API</a>
+            </div>
+            <p class="small opacity-50">© 2024 SmartBooking HUB. Ingeniería de alto nivel para el cuidado personal.</p>
+        </div>
+    </footer>
 
     <!-- Modal de Autenticación Luxury -->
     <div class="modal fade modal-luxury" id="authModal" tabindex="-1" aria-hidden="true">
@@ -201,7 +306,17 @@
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Efecto Navbar al hacer scroll
+        window.addEventListener('scroll', function () {
+            if (window.scrollY > 50) {
+                document.querySelector('.navbar').classList.add('shadow-sm');
+            } else {
+                document.querySelector('.navbar').classList.remove('shadow-sm');
+            }
+        });
+    </script>
 </body>
-<!-- Prueba de flujo de trabajo - Rama Nacho -->
+
 
 </html>
