@@ -2,30 +2,32 @@
 
 :root {
     --primary-blue: #0A2647; /* Azul Medianoche Corporativo */
-    --accent-orange: #F58220; /* El naranja de tu logo para detalles */
+    --accent-orange: #F58220; /* El naranja de tu logo */
     --soft-bg: #F9F7F5; /* Tono lino para fondos */
     --text-dark: #1A1A1A;
+    --white: #ffffff;
 }
 
 body {
     font-family: 'Montserrat', sans-serif;
     color: var(--text-dark);
     scroll-behavior: smooth;
+    line-height: 1.6;
 }
 
-h1, h2, .navbar-brand {
+h1, h2, h3, h4, .navbar-brand, .section-title {
     font-family: 'Cormorant Garamond', serif;
     letter-spacing: -1px;
 }
 
-/* Navbar Transparente con Blur */
+/* --- Navbar --- */
 .navbar {
     background: rgba(255, 255, 255, 0.8) !important;
     backdrop-filter: blur(15px);
     transition: all 0.4s ease;
 }
 
-/* Hero Section: Minimalismo puro */
+/* --- Hero Section --- */
 .hero-corporate {
     padding: 180px 0 100px;
     background-color: var(--soft-bg);
@@ -38,10 +40,10 @@ h1, h2, .navbar-brand {
     text-transform: uppercase;
 }
 
-/* Botones con estilo "Luxury" */
+/* --- Botones Luxury --- */
 .btn-corp {
     padding: 15px 40px;
-    border-radius: 0;
+    border-radius: 0; /* Mantenemos el estilo cuadrado */
     font-size: 0.8rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -60,20 +62,81 @@ h1, h2, .navbar-brand {
     color: var(--primary-blue);
 }
 
-/* Imagen con "Frame" arquitectónico */
+/* --- Secciones Globales --- */
+.section-title {
+    font-size: 2.8rem;
+    color: var(--primary-blue);
+    margin-bottom: 1.5rem;
+}
+
+.section-subtitle {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 3px;
+    color: var(--accent-orange);
+    text-transform: uppercase;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 10px;
+}
+
+/* --- Sección Gestión --- */
 .img-frame {
     padding: 15px;
     border: 1px solid #e0e0e0;
     background: white;
+    transition: transform 0.5s ease;
 }
-/* Estilo Luxury para el Modal */
+
+.img-frame:hover {
+    transform: scale(1.02);
+}
+
+/* --- Sección Análisis (Cards) --- */
+.feature-card {
+    border-radius: 0 !important; /* Mantenemos consistencia con el diseño cuadrado */
+    border: 1px solid #eee !important;
+    transition: all 0.4s ease;
+    background: var(--white);
+}
+
+.feature-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.05) !important;
+    border-color: var(--accent-orange) !important;
+}
+
+.feature-card.highlight {
+    background-color: var(--primary-blue);
+    color: var(--white);
+    border: none !important;
+}
+
+.feature-card i {
+    color: var(--accent-orange);
+    margin-bottom: 20px;
+    display: inline-block;
+}
+
+/* --- Sección Soporte / Contacto --- */
+.contact-info-box {
+    background-color: var(--primary-blue);
+    color: var(--white);
+    padding: 60px;
+}
+
+.form-container {
+    padding: 60px;
+    background: var(--white);
+}
+
+/* --- Modal Luxury --- */
 .modal-luxury .modal-content {
     border-radius: 0;
     background-color: #ffffff;
     border: 1px solid #e0e0e0;
 }
 
-/* Pestañas (Pills) Minimalistas */
 .nav-luxury .nav-link {
     color: #999;
     font-family: 'Montserrat', sans-serif;
@@ -92,8 +155,9 @@ h1, h2, .navbar-brand {
     border-bottom: 2px solid var(--primary-blue);
 }
 
-/* Inputs Refinados */
-.form-luxury .form-control {
+/* --- Inputs Refinados --- */
+.form-luxury .form-control, 
+.form-luxury textarea {
     border-radius: 0;
     border: none;
     border-bottom: 1px solid #e0e0e0;
@@ -102,9 +166,11 @@ h1, h2, .navbar-brand {
     background-color: transparent;
 }
 
-.form-luxury .form-control:focus {
+.form-luxury .form-control:focus,
+.form-luxury textarea:focus {
     box-shadow: none;
     border-bottom: 1px solid var(--primary-blue);
+    background-color: transparent;
 }
 
 .form-luxury label {
@@ -116,19 +182,26 @@ h1, h2, .navbar-brand {
     color: #999;
 }
 
-/* Selector de Perfil Dinámico */
-.custom-option input:checked + label {
-    background-color: var(--primary-blue) !important;
-    color: white !important;
-    border-color: var(--primary-blue) !important;
+/* --- Footer --- */
+footer {
+    background-color: var(--primary-blue);
+    color: rgba(255,255,255,0.7);
+    padding: 80px 0 40px;
 }
 
-.custom-option label {
-    border-radius: 0;
+.footer-link {
     font-size: 0.7rem;
+    text-transform: uppercase;
     letter-spacing: 1px;
-    cursor: pointer;
+    color: rgba(255,255,255,0.5);
+    text-decoration: none;
     transition: 0.3s;
-    border: 1px solid #e0e0e0;
-    color: #999;
 }
+
+.footer-link:hover {
+    color: var(--accent-orange);
+}
+
+/* --- Utilidades --- */
+.text-accent { color: var(--accent-orange) !important; }
+.bg-soft { background-color: var(--soft-bg); }
