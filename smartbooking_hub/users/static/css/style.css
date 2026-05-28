@@ -182,6 +182,26 @@ h1, h2, h3, h4, .navbar-brand, .section-title {
     color: #999;
 }
 
+/* --- Selector de Roles (¡Agregado para corregir la interacción!) --- */
+.custom-option label {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid #e0e0e0 !important;
+    border-radius: 0 !important;
+    color: #6c757d;
+}
+
+.custom-option label:hover {
+    background-color: #f8f9fa;
+    border-color: var(--primary-blue) !important;
+}
+
+.custom-option input[type="radio"]:checked + label {
+    background-color: var(--primary-blue) !important;
+    color: var(--white) !important;
+    border-color: var(--primary-blue) !important;
+}
+
 /* --- Footer --- */
 footer {
     background-color: var(--primary-blue);
