@@ -20,8 +20,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 # Convierte la lista separada por comas del .env en una lista de Python
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
-
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', os.getenv('ALLOWED_HOSTS', '*')]
 
 # Application definition
 INSTALLED_APPS = [
