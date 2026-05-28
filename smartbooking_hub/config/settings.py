@@ -6,23 +6,36 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 
-# Carga las variables del archivo .env
-load_dotenv()
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# ==============================================================================
+# CARGA DE VARIABLES DE ENTORNO
+# ==============================================================================
+# Buscamos el archivo .env en la raíz del espacio de trabajo
 BASE_DIR = Path(__file__).resolve().parent.parent
+WORKSPACE_DIR = BASE_DIR.parent
+ENV_PATH = WORKSPACE_DIR / '.env'
 
-# SECURITY WARNING: keep the secret key used in production secret!
+# Cargamos el archivo usando la librería segura python-dotenv
+if ENV_PATH.exists():
+    load_dotenv(ENV_PATH)
+else:
+    # Respaldo por si se ejecuta dentro de smartbooking_hub directamente
+    load_dotenv()
+
+# ==============================================================================
+# CONFIGURACIÓN BÁSICA DE DJANGO
+# ==============================================================================
 SECRET_KEY = os.getenv('SECRET_KEY')
 
-# SECURITY WARNING: don't run with debug turned on in production!
 # Transforma el string 'True' del .env a un booleano real
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-# Convierte la lista separada por comas del .env en una lista de Python
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', os.getenv('ALLOWED_HOSTS', '*')]
+# Convierte el string del .env ("localhost,127.0.0.1,*") en una lista de Python
+env_hosts = os.getenv('ALLOWED_HOSTS', '*')
+ALLOWED_HOSTS = [host.strip() for host in env_hosts.split(',')]
 
-# Application definition
+# ==============================================================================
+# APLICACIONES Y MIDDLEWARE
+# ==============================================================================
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -70,9 +83,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-
-# Database
-# Configuración para PostgreSQL usando variables de entorno
+# ==============================================================================
+# BASE DE DATOS (PostgreSQL)
+# ==============================================================================
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -84,48 +97,41 @@ DATABASES = {
     }
 }
 
-
-# Password validation
+# ==============================================================================
+# SEGURIDAD Y VALIDACIÓN DE CONTRASEÑAS
+# ==============================================================================
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
+AUTH_USER_MODEL = 'users.User'
 
-# Internationalization
+# ==============================================================================
+# INTERNACIONALIZACIÓN Y ARCHIVOS ESTÁTICOS
+# ==============================================================================
 LANGUAGE_CODE = 'es-cl'
 TIME_ZONE = 'America/Santiago'
 USE_I18N = True
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
 STATIC_URL = 'static/'
-STATICFILES_DIRS = [
-    BASE_DIR / 'static',
-]
+STATICFILES_DIRS = [BASE_DIR / 'static']
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-
-# Configuraciones de Email
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL = f'SmartBooking HUB <{os.getenv("EMAIL_HOST_USER")}>'
 
 # Configuración de CORS (Permite conexiones desde tu frontend en React)
 CORS_ALLOW_ALL_ORIGINS = True
-AUTH_USER_MODEL = 'users.User'
+
+# ==============================================================================
+# CONFIGURACIÓN DEL SERVIDOR DE CORREO SMTP (GMAIL)
+# ==============================================================================
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 465
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = True
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'contacto.sbhub@gmail.com')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = f'SmartBooking HUB <{EMAIL_HOST_USER}>'
