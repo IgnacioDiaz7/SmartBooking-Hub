@@ -2,11 +2,23 @@ from django.db import models
 from django.conf import settings
 
 class Business(models.Model):
-    name = models.CharField(max_length=255)
+    TIPO_NEGOCIO_CHOICES = [
+        ('salon_belleza', 'Salón de Belleza'),
+        ('peluqueria', 'Peluquería'),
+        ('barberia', 'Barbería'),
+        ('spa', 'Spa / Centro de Estética'),
+    ]
+
+    name = models.CharField(max_length=255, verbose_name="Nombre del Negocio")
     slug = models.SlugField(unique=True)
-    phone = models.CharField(max_length=20, blank=True, null=True)
-    email = models.EmailField(blank=True, null=True)
-    address = models.TextField(blank=True, null=True)
+    business_type = models.CharField(max_length=50, choices=TIPO_NEGOCIO_CHOICES, default='salon_belleza', verbose_name="Tipo de Negocio")
+    
+    # Contacto y Ubicación
+    phone = models.CharField(max_length=20, blank=True, null=True, verbose_name="Teléfono de Contacto")
+    email = models.EmailField(blank=True, null=True, verbose_name="Correo del Negocio")
+    address = models.TextField(blank=True, null=True, verbose_name="Dirección Comercial")
+    instagram = models.URLField(blank=True, null=True, verbose_name="Enlace de Instagram")
+    
     plan_type = models.CharField(max_length=50, choices=[
         ('free', 'Gratis'),
         ('pro', 'Pro'),
@@ -67,3 +79,16 @@ class BusinessHour(models.Model):
 
     class Meta:
         unique_together = ('business', 'day_of_week')
+        
+class Appointment(models.Model):
+    business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='appointments')
+    staff = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='appointments')
+    service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name='appointments')
+    date = models.DateTimeField()
+    # Guardamos el precio en el momento de la cita para que no cambie si el precio del servicio cambia después
+    price = models.DecimalField(max_digits=10, decimal_places=2) 
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.service.name} - {self.staff.first_name} - {self.date}"

@@ -20,6 +20,16 @@
 </head>
 
 <body>
+    <div class="container mt-3">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show shadow-sm" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
 
     <nav class="navbar navbar-expand-lg navbar-light fixed-top py-3 shadow-sm">
         <div class="container">
@@ -236,14 +246,15 @@
                                 <h2 class="h3 mb-2">Bienvenido</h2>
                                 <p class="text-muted small italic">Gestión de alto rendimiento para su negocio</p>
                             </div>
-                            <form>
+                            <form method="POST" action="{% url 'login' %}">
+                                {% csrf_token %}
                                 <div class="mb-4">
                                     <label class="form-label">Email Corporativo</label>
-                                    <input type="email" class="form-control" placeholder="nombre@estetica.com" required>
+                                    <input type="email" name="email" class="form-control" placeholder="nombre@estetica.com" required>
                                 </div>
                                 <div class="mb-5">
                                     <label class="form-label">Contraseña</label>
-                                    <input type="password" class="form-control" placeholder="••••••••" required>
+                                    <input type="password" name="password" class="form-control" placeholder="••••••••" required>
                                 </div>
                                 <button type="submit" class="btn btn-corp btn-main w-100">Entrar al Sistema</button>
                             </form>
