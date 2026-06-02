@@ -1,11 +1,15 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
+
 class User(AbstractUser):
     # AbstractUser ya incluye first_name, last_name, password (hash), is_active
     email = models.EmailField(unique=True)
+    
+    # Agregamos 'owner' a las opciones válidas para que haga match con el frontend
     role = models.CharField(max_length=50, choices=[
         ('admin', 'Administrador'),
+        ('owner', 'Dueño de Negocio'),
         ('worker', 'Trabajador'),
         ('client', 'Cliente')
     ], default='client')
