@@ -9,27 +9,45 @@
 
     <link rel="icon" type="image/png" href="{% static 'img/logo.png' %}">
 
-    <!-- Google Fonts: Poppins -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- CSS Personalizado -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 
 <body>
-    <div class="container mt-3">
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show shadow-sm" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 9999; margin-top: 90px;">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show shadow-lg d-flex align-items-center" role="alert" style="min-width: 300px;">
+                    
+                    {% if message.tags == 'error' %}
+                        <i class="bi bi-exclamation-triangle-fill fs-4 me-3 text-danger"></i>
+                    {% else %}
+                        <i class="bi bi-check-circle-fill fs-4 me-3 text-success"></i>
+                    {% endif %}
+                    
+                    <div>
+                        <strong>Notificación del Sistema</strong><br>
+                        <span class="small">{{ message }}</span>
                     </div>
-                {% endfor %}
-            {% endif %}
+                    <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+    <div class="container mt-3">
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show shadow-sm"
+            role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
+        {% endfor %}
+        {% endif %}
+    </div>
 
     <nav class="navbar navbar-expand-lg navbar-light fixed-top py-3 shadow-sm">
         <div class="container">
@@ -43,9 +61,12 @@
 
             <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
                 <ul class="navbar-nav gap-4">
-                    <li class="nav-item"><a class="nav-link small fw-bold text-uppercase" href="#gestion">GESTIÓN</a></li>
-                    <li class="nav-item"><a class="nav-link small fw-bold text-uppercase" href="#analisis">ANÁLISIS</a></li>
-                    <li class="nav-item"><a class="nav-link small fw-bold text-uppercase" href="#soporte">SOPORTE</a></li>
+                    <li class="nav-item"><a class="nav-link small fw-bold text-uppercase" href="#gestion">GESTIÓN</a>
+                    </li>
+                    <li class="nav-item"><a class="nav-link small fw-bold text-uppercase" href="#analisis">ANÁLISIS</a>
+                    </li>
+                    <li class="nav-item"><a class="nav-link small fw-bold text-uppercase" href="#soporte">SOPORTE</a>
+                    </li>
                 </ul>
             </div>
 
@@ -58,7 +79,6 @@
         </div>
     </nav>
 
-    <!-- Hero Section Corporativo -->
     <section class="hero-corporate">
         <div class="container">
             <div class="row align-items-center">
@@ -77,7 +97,6 @@
                 </div>
                 <div class="col-lg-6 mt-5 mt-lg-0">
                     <div class="img-frame shadow-lg">
-                        <!-- Imagen representativa de alta gama -->
                         <img src="https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&w=1000"
                             class="img-fluid" alt="Salon Luxury">
                     </div>
@@ -85,12 +104,12 @@
             </div>
         </div>
     </section>
-   
+
     <section id="gestion" class="py-5">
         <div class="container py-5">
             <div class="row align-items-center">
                 <div class="col-lg-6 order-lg-2">
-                    <h6 class="text-uppercase fw-bold mb-3" >
+                    <h6 class="text-uppercase fw-bold mb-3">
                         Arquitectura de Procesos</h6>
                     <h2 class="display-5 section-title mb-4">Gestión inteligente de flujos de trabajo.</h2>
                     <p class="lead text-muted mb-4">Optimice el rendimiento de sus especialistas con herramientas
@@ -119,7 +138,7 @@
             </div>
         </div>
     </section>
-    <!-- Sección ANÁLISIS (Data Insights) -->
+
     <section id="analisis" class="py-5 bg-light">
         <div class="container py-5">
             <div class="text-center mb-5">
@@ -155,12 +174,13 @@
             </div>
         </div>
     </section>
-    <!-- Sección SOPORTE (Contact/Support) -->
+
     <section id="soporte" class="py-5">
         <div class="container py-5">
             <div class="bg-white rounded-5 shadow-lg overflow-hidden">
                 <div class="row g-0">
-                    <div class="col-lg-5 p-5 text-white d-flex flex-column justify-content-center" style="background-color: #0A2647;">
+                    <div class="col-lg-5 p-5 text-white d-flex flex-column justify-content-center"
+                        style="background-color: #0A2647;">
                         <h3 class="fw-bold mb-4">Asistencia Técnica Premium</h3>
                         <p class="opacity-75 mb-5">Nuestro equipo de ingeniería está listo para acompañar su
                             transformación digital.</p>
@@ -203,7 +223,6 @@
         </div>
     </section>
 
-    <!-- Footer -->
     <footer class="bg-navy py-5 text-white text-center">
         <div class="container">
             <img src="{% static 'img/logo.png' %}" alt="SmartBooking HUB" height="80" class="mb-4 filter-white">
@@ -212,16 +231,14 @@
                 <a href="#" class="footer-link">Política de Privacidad</a>
                 <a href="#" class="footer-link">Documentación API</a>
             </div>
-            <p class="small opacity-50">© 2024 SmartBooking HUB. Ingeniería de alto nivel para el cuidado personal.</p>
+            <p class="small opacity-50">© 2026 SmartBooking HUB. Ingeniería de alto nivel para el cuidado personal.</p>
         </div>
     </footer>
 
-    <!-- Modal de Autenticación Luxury -->
     <div class="modal fade modal-luxury" id="authModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content shadow-2xl p-4">
 
-                <!-- Cabecera con Pestañas -->
                 <div class="modal-header border-0 justify-content-center">
                     <ul class="nav nav-luxury w-100 mb-4 justify-content-center" id="pills-tab" role="tablist">
                         <li class="nav-item w-50 text-center">
@@ -240,7 +257,6 @@
                 <div class="modal-body form-luxury">
                     <div class="tab-content" id="pills-tabContent">
 
-                        <!-- Pestaña: INICIAR SESIÓN -->
                         <div class="tab-pane fade show active" id="pills-login" role="tabpanel">
                             <div class="text-center mb-5">
                                 <h2 class="h3 mb-2">Bienvenido</h2>
@@ -250,28 +266,29 @@
                                 {% csrf_token %}
                                 <div class="mb-4">
                                     <label class="form-label">Email Corporativo</label>
-                                    <input type="email" name="email" class="form-control" placeholder="nombre@estetica.com" required>
+                                    <input type="email" name="email" class="form-control"
+                                        placeholder="nombre@estetica.com" required>
                                 </div>
                                 <div class="mb-5">
                                     <label class="form-label">Contraseña</label>
-                                    <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+                                    <input type="password" name="password" class="form-control" placeholder="••••••••"
+                                        required>
                                 </div>
                                 <button type="submit" class="btn btn-corp btn-main w-100">Entrar al Sistema</button>
                             </form>
                         </div>
 
-                        <!-- Pestaña: REGISTRO -->
                         <div class="tab-pane fade" id="pills-register" role="tabpanel">
                             <div class="text-center mb-5">
                                 <h2 class="h3 mb-2">Nueva Cuenta</h2>
                                 <p class="text-muted small italic">Inicie su transformación digital hoy</p>
                             </div>
 
-                            <!-- Agregamos el método POST y la URL de la vista de registro -->
-                            <form method="POST" action="{% url 'registro_dueno' %}">
-                                {% csrf_token %} <!-- Seguridad obligatoria de Django -->
+                            <div id="modal-alertas-registro"></div>
 
-                                <!-- Selector de Perfil -->
+                            <form id="form-api-registro">
+                                {% csrf_token %}
+
                                 <div class="mb-4">
                                     <label class="form-label d-block mb-3 text-center">¿Cómo usará SmartBooking
                                         HUB?</label>
@@ -291,24 +308,43 @@
                                     </div>
                                 </div>
 
-                                <div class="mb-4">
-                                    <label class="form-label">Nombre Completo</label>
-                                    <!-- Agregamos name="nombre" para capturarlo en el servidor -->
-                                    <input type="text" name="nombre" class="form-control" required>
+                                <div class="row g-2 mb-4">
+                                    <div class="col-6">
+                                        <label class="form-label">Nombre</label>
+                                        <input type="text" id="reg_first_name" class="form-control" required>
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label">Apellido</label>
+                                        <input type="text" id="reg_last_name" class="form-control" required>
+                                    </div>
                                 </div>
+
                                 <div class="mb-4">
                                     <label class="form-label">Email de Contacto</label>
-                                    <!-- Agregamos name="email" -->
-                                    <input type="email" name="email" class="form-control" required>
+                                    <input type="email" id="reg_email" class="form-control" required>
                                 </div>
-                                <div class="mb-5">
+                                <div class="mb-4">
                                     <label class="form-label">Contraseña</label>
-                                    <!-- Agregamos name="password" -->
-                                    <input type="password" name="password" class="form-control"
+                                    <input type="password" id="reg_password" class="form-control"
                                         placeholder="Mínimo 8 caracteres" required>
                                 </div>
 
-                                <button type="submit" class="btn btn-corp btn-main w-100">Crear Credenciales</button>
+                                <div id="bloque-tarjeta" style="display: none;"
+                                    class="bg-light p-3 rounded mb-4 border text-center">
+                                    <div class="mb-2">
+                                        <img src="{% static 'img/logo-web-pay-plus.png' %}" alt="Webpay Oneclick" height="35" class="mb-2">
+                                    </div>
+                                    <h6 class="fw-bold text-muted mb-2" style="font-size: 13px;">Inscripción obligatoria
+                                        de tarjeta</h6>
+                                    <p class="small text-muted mb-0 px-2" style="font-size: 11.5px;">
+                                        Al hacer clic en "Crear Credenciales", serás redirigido de forma segura al
+                                        portal de <strong>Transbank</strong> para enrolar tu tarjeta. Esto activará de
+                                        inmediato tu periodo de prueba de 2 meses sin costos asociados hoy.
+                                    </p>
+                                </div>
+
+                                <button type="submit" id="btn-submit-reg" class="btn btn-corp btn-main w-100">Crear
+                                    Credenciales</button>
                             </form>
                         </div>
                     </div>
@@ -316,7 +352,16 @@
             </div>
         </div>
     </div>
+    </form>
+    </div>
+    </div>
+    </div>
+    </div>
+    </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
         // Efecto Navbar al hacer scroll
         window.addEventListener('scroll', function () {
@@ -326,8 +371,123 @@
                 document.querySelector('.navbar').classList.remove('shadow-sm');
             }
         });
+
+        // =========================================================
+        // Lógica de Interfaz: Mostrar/Ocultar Info de Transbank
+        // =========================================================
+        const radioCliente = document.getElementById('roleCliente');
+        const radioOwner = document.getElementById('roleOwner');
+        const bloqueTarjeta = document.getElementById('bloque-tarjeta');
+
+        if (radioCliente && radioOwner && bloqueTarjeta) {
+            radioCliente.addEventListener('change', () => bloqueTarjeta.style.display = 'none');
+            radioOwner.addEventListener('change', () => bloqueTarjeta.style.display = 'block');
+        }
+
+        // =========================================================
+        // Lógica de Registro con API Rest e Integración Transbank
+        // =========================================================
+        document.getElementById('form-api-registro').addEventListener('submit', async function (e) {
+            e.preventDefault(); // Evita que la página se recargue
+
+            const contenedorAlertas = document.getElementById('modal-alertas-registro');
+            contenedorAlertas.innerHTML = '';
+
+            // Extraer el rol seleccionado de los radio buttons primero
+            const rolSeleccionado = document.querySelector('input[name="userRole"]:checked').value;
+
+            // Efecto de carga en el botón (Dinámico según el rol)
+            const btnSubmit = document.getElementById('btn-submit-reg');
+            const textoOriginal = btnSubmit.innerHTML;
+            if (rolSeleccionado === 'owner') {
+                btnSubmit.innerHTML = 'Redirigiendo a Webpay... <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+            } else {
+                btnSubmit.innerHTML = 'Procesando... <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+            }
+            btnSubmit.disabled = true;
+
+            // Armar el JSON (Sin campos de tarjeta locales, Transbank procesa de forma externa)
+            const datos = {
+                first_name: document.getElementById('reg_first_name').value,
+                last_name: document.getElementById('reg_last_name').value,
+                email: document.getElementById('reg_email').value,
+                username: document.getElementById('reg_email').value, // El email actúa como username
+                password: document.getElementById('reg_password').value,
+                role: rolSeleccionado
+            };
+
+            try {
+                // Enviar datos al endpoint unificado de registro
+                const respuesta = await fetch('/api/registro/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    },
+                    body: JSON.stringify(datos)
+                });
+
+                const resultado = await respuesta.json();
+
+                if (respuesta.status === 201) {
+                    // VERIFICACIÓN: ¿El flujo exige enrolamiento bancario en Transbank? (Solo Dueños)
+                    if (resultado.requiere_redireccion) {
+                        contenedorAlertas.innerHTML = `
+                    <div class="alert alert-info rounded-3 small p-3 mb-4 text-center">
+                        <span class="spinner-border spinner-border-sm me-2"></span>
+                        Conexión segura establecida. Redirigiendo a Webpay...
+                    </div>`;
+
+                        // Transbank exige un envío HTTP POST hacia su pasarela con el parámetro obligatorio TBK_TOKEN
+                        const formVirtual = document.createElement('form');
+                        formVirtual.method = 'POST';
+                        formVirtual.action = resultado.url_webpay;
+
+                        const inputToken = document.createElement('input');
+                        inputToken.type = 'hidden';
+                        inputToken.name = 'TBK_TOKEN';
+                        inputToken.value = resultado.token;
+
+                        formVirtual.appendChild(inputToken);
+                        document.body.appendChild(formVirtual);
+
+                        // Ejecuta el envío automático hacia los servidores seguros de Transbank
+                        formVirtual.submit();
+                    } else {
+                        // Flujo normal para Clientes (Mensaje exitoso de confirmación de email directo)
+                        let exitoHtml = `
+                    <div class="alert alert-success rounded-3 small p-3 mb-4 text-center">
+                        <i class="bi bi-envelope-check fs-2 d-block mb-2 text-success"></i>
+                        <strong>${resultado.mensaje}</strong><br>
+                        Por favor, revise su bandeja de entrada o la carpeta de SPAM.
+                    </div>`;
+                        contenedorAlertas.innerHTML = exitoHtml;
+
+                        // Ocultamos el formulario para evitar clics duplicados
+                        document.getElementById('form-api-registro').style.display = 'none';
+                    }
+
+                } else {
+                    // Error: Mostrar las excepciones controladas de Django Rest Framework en pantalla
+                    let erroresHtml = '<div class="alert alert-danger rounded-3 small p-3 mb-4"><ul class="mb-0">';
+                    for (const campo in resultado) {
+                        erroresHtml += `<li><strong>${campo}:</strong> ${resultado[campo]}</li>`;
+                    }
+                    erroresHtml += '</ul></div>';
+                    contenedorAlertas.innerHTML = erroresHtml;
+
+                    // Restauramos el estado del botón
+                    btnSubmit.innerHTML = textoOriginal;
+                    btnSubmit.disabled = false;
+                }
+            } catch (error) {
+                // Manejo de caídas de red o pérdida de comunicación con el localhost
+                contenedorAlertas.innerHTML = '<div class="alert alert-danger rounded-3 small p-3 mb-4">Error de conexión con el servidor. Por favor, intente nuevamente.</div>';
+                btnSubmit.innerHTML = textoOriginal;
+                btnSubmit.disabled = false;
+            }
+        });
     </script>
 </body>
-
 
 </html>
