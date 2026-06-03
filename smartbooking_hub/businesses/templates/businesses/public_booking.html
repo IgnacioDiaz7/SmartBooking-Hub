@@ -1,0 +1,295 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reservar en {{ business.name }} | SmartBooking HUB</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8f9fa; }
+        .hero-section { background-color: #0A2647; color: white; padding: 3rem 0; border-bottom: 5px solid #F58220; }
+        .service-card { transition: all 0.2s ease; cursor: pointer; border: 1px solid #dee2e6; }
+        .service-card:hover { border-color: #F58220; box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important; transform: translateY(-2px); }
+        .booking-step { display: none; }
+        .booking-step.active { display: block; }
+        .btn-check:checked + .option-card { border-color: #ff7700 !important; background-color: rgba(245,130,32,0.05); }
+        .option-card {
+            border: 1px solid #dee2e6;
+            background-color: #ffffff;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-check:checked + .option-card {
+            border: 2px solid #F58220 !important;
+            background-color: rgba(245, 130, 32, 0.05) !important;
+        }
+        
+        /* Forzamos que el texto principal siempre sea oscuro */
+        .btn-check:checked + .option-card .titulo-opcion {
+            color: #0A2647 !important;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header del Local -->
+    <header class="hero-section text-center shadow-sm">
+        <div class="container">
+            <h1 class="fw-bold mb-2">{{ business.name }}</h1>
+            <p class="mb-1 text-white-50"><i class="bi bi-geo-alt-fill me-2 text-warning"></i>{{ business.address|default:"Dirección no especificada" }}</p>
+            <p class="mb-0 text-white-50"><i class="bi bi-telephone-fill me-2 text-warning"></i>{{ business.phone|default:"Sin teléfono" }}</p>
+        </div>
+    </header>
+    {% if messages %}
+            <div class="mt-4">
+                {% for message in messages %}
+                    <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show rounded-0 shadow-sm" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+    <main class="container py-5" style="max-width: 800px;">
+        <div class="card border-0 shadow-sm rounded-0 bg-white">
+            <div class="card-body p-4 p-md-5">
+                
+                <!-- ========================================== -->
+                <!-- PASO 1: SELECCIÓN DE SERVICIO -->
+                <!-- ========================================== -->
+                <div id="step-1" class="booking-step active">
+                    <h4 class="fw-bold text-center mb-4" style="color: #0A2647;">Paso 1: Seleccione un Servicio</h4>
+                    
+                    <div class="row g-3">
+                        {% for s in servicios %}
+                        <div class="col-12">
+                            <label class="card service-card rounded-0 p-3 h-100 w-100 text-start" for="service_{{ s.id }}">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="fw-bold mb-1" style="color: #0A2647;">{{ s.name }}</h6>
+                                        <span class="badge bg-light text-dark border rounded-0" id="duration_{{ s.id }}" data-minutes="{{ s.duration_minutes }}"><i class="bi bi-clock me-1"></i>{{ s.duration_minutes }} min</span>
+                                    </div>
+                                    <div class="text-end">
+                                        <h5 class="fw-bold text-success mb-2">${{ s.price|floatformat:0 }}</h5>
+                                        <div class="form-check d-inline-block">
+                                            <input class="form-check-input service-radio" type="radio" name="selected_service" id="service_{{ s.id }}" value="{{ s.id }}" style="transform: scale(1.3); cursor: pointer;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="text-center mt-5 pt-3 border-top">
+                        <button type="button" id="btn-to-step-2" class="btn text-white fw-bold rounded-0 px-5 py-3 w-100 disabled" style="background-color: #F58220; max-width: 400px; letter-spacing: 1px;">
+                            CONTINUAR
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ========================================== -->
+                <!-- PASO 2: FECHA Y PROFESIONAL -->
+                <!-- ========================================== -->
+                <div id="step-2" class="booking-step" style="display: none;">
+                    <button type="button" class="btn btn-link text-muted p-0 text-decoration-none mb-4" onclick="goToStep(1)">
+                        <i class="bi bi-arrow-left me-1"></i> Volver a Servicios
+                    </button>
+                    
+                    <h4 class="fw-bold text-center mb-4" style="color: #0A2647;">Paso 2: Fecha y Especialista</h4>
+                    
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-muted text-uppercase">Seleccione una Fecha</label>
+                            <input type="date" id="booking_date" class="form-control rounded-0 py-2">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small text-muted text-uppercase">Seleccione Especialista (Opcional)</label>
+                            <select id="booking_staff" class="form-select rounded-0 py-2">
+                                <option value="any">Cualquiera disponible</option>
+                                {% for colab in staff_list %}
+                                <option value="{{ colab.user.id }}">{{ colab.user.first_name }} {{ colab.user.last_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="time-slots-container" class="mt-5">
+                        <p class="text-center text-muted small mt-4">Seleccione una fecha para ver los horarios disponibles.</p>
+                        <!-- Aquí se inyectarán las horas con JavaScript -->
+                        <div id="slots-grid" class="d-flex flex-wrap gap-2 justify-content-center mt-3"></div>
+                    </div>
+                </div>
+                <div id="step-3" class="booking-step" style="display: none;">
+                    <button type="button" class="btn btn-link text-muted p-0 text-decoration-none mb-4" onclick="goToStep(2)">
+                        <i class="bi bi-arrow-left me-1"></i> Volver a Horarios
+                    </button>
+                    
+                    <h4 class="fw-bold text-center mb-4" style="color: #0A2647;">Paso 3: Sus Datos Personales</h4>
+                    
+                    <form method="POST" action="{% url 'confirm_booking' business.slug %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="service_id" id="form_service_id">
+                        <input type="hidden" name="staff_id" id="form_staff_id">
+                        <input type="hidden" name="date" id="form_date">
+                        <input type="hidden" name="time" id="form_time">
+
+                        <!-- DATOS DE CONTACTO EXISTENTES -->
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-muted">Nombre</label>
+                                <input type="text" name="first_name" class="form-control rounded-0" placeholder="Ej: Juan" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-muted">Apellido</label>
+                                <input type="text" name="last_name" class="form-control rounded-0" placeholder="Ej: Pérez" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-muted">Correo Electrónico</label>
+                                <input type="email" name="email" class="form-control rounded-0" placeholder="juan@correo.com" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-muted">Teléfono</label>
+                                <input type="text" name="phone" class="form-control rounded-0" placeholder="+56 9 1234 5678" required>
+                            </div>
+                        </div>
+
+                        <!-- NUEVO: MENSAJE EMPÁTICO Y OPCIONES DE ABONO -->
+                        <div class="alert mt-4 rounded-0" style="background-color: rgba(245, 130, 32, 0.05); border-left: 4px solid #F58220;">
+                            <h6 class="fw-bold mb-2" style="color: #0A2647;">
+                                <i class="bi bi-clock-history me-2" style="color: #F58220;"></i>Valoramos tu tiempo y el nuestro
+                            </h6>
+                            <p class="small text-muted mb-0" style="text-align: justify;">
+                                Sabemos que tu tiempo es oro, al igual que el de nuestros especialistas. Al realizar un abono opcional, <strong>aseguras tu hora de forma exclusiva</strong> y nos ayudas a reducir inasistencias, permitiéndonos organizar mejor el día para brindarte el servicio que mereces.
+                            </p>
+                        </div>
+
+                        <div class="row g-2 mt-2 mb-4">
+                            <div class="col-md-6">
+                                <input type="radio" class="btn-check" name="tipo_pago" id="pago_abono" value="abono" checked>
+                                <label class="w-100 rounded-0 h-100 text-start p-3 d-flex align-items-center option-card" for="pago_abono">
+                                    <div class="me-3">
+                                        <i class="bi bi-shield-check fs-3 text-success"></i>
+                                    </div>
+                                    <div>
+                                        <span class="d-block fw-bold titulo-opcion" style="color: #0A2647;">Abonar y Asegurar Cita</span>
+                                        <small class="text-muted" style="font-size: 0.75rem;">Pago seguro vía Webpay</small>
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="col-md-6">
+                                <input type="radio" class="btn-check" name="tipo_pago" id="pago_local" value="local">
+                                <label class="w-100 rounded-0 h-100 text-start p-3 d-flex align-items-center option-card" for="pago_local">
+                                    <div class="me-3">
+                                        <i class="bi bi-shop fs-3 text-secondary"></i>
+                                    </div>
+                                    <div>
+                                        <span class="d-block fw-bold titulo-opcion" style="color: #0A2647;">Reservar sin Abono</span>
+                                        <small class="text-muted" style="font-size: 0.75rem;">Pago del 100% en el local</small>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn w-100 text-white fw-bold rounded-0 py-3 mt-2" style="background-color: #0A2647; letter-spacing: 1px;">
+                            CONTINUAR CON LA RESERVA <i class="bi bi-arrow-right ms-2"></i>
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Script de Transición -->
+    <script>
+        let selectedServiceId = null;
+        const businessSlug = "{{ business.slug }}";
+
+        // Capturar selección de servicio
+        document.querySelectorAll('.service-radio').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                selectedServiceId = e.target.value;
+                document.getElementById('btn-to-step-2').classList.remove('disabled');
+            });
+        });
+
+        // Cambiar entre paso 1 y 2
+        document.getElementById('btn-to-step-2').addEventListener('click', () => {
+            document.querySelectorAll('.booking-step').forEach(el => el.style.display = 'none');
+            document.getElementById('step-2').style.display = 'block';
+        });
+
+        function goToStep(stepNumber) {
+            document.querySelectorAll('.booking-step').forEach(el => el.style.display = 'none');
+            document.getElementById('step-' + stepNumber).style.display = 'block';
+        }
+
+        // --- LÓGICA REACTIVA DEL CALENDARIO ---
+        const dateInput = document.getElementById('booking_date');
+        const slotsGrid = document.getElementById('slots-grid');
+
+        // Bloquear días en el pasado
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.setAttribute('min', today);
+
+        dateInput.addEventListener('change', async (e) => {
+            const selectedDate = e.target.value;
+            
+            if (!selectedServiceId) {
+                slotsGrid.innerHTML = '<p class="text-danger fw-bold">Por favor, vuelva al paso 1 y seleccione un servicio primero.</p>';
+                return;
+            }
+
+            slotsGrid.innerHTML = '<div class="spinner-border text-warning" role="status"><span class="visually-hidden">Calculando...</span></div>';
+            
+            try {
+                // Consultamos a Django el horario exacto del negocio
+                const response = await fetch(`/api/disponibilidad/${businessSlug}/?date=${selectedDate}&service_id=${selectedServiceId}`);
+                const data = await response.json();
+
+                slotsGrid.innerHTML = '';
+
+                if (data.error) {
+                    slotsGrid.innerHTML = `<p class="text-danger fw-bold">Error del servidor: ${data.error}</p>`;
+                    return;
+                }
+
+                if (data.slots && data.slots.length > 0) {
+                    // Dibujamos las horas reales
+                    data.slots.forEach(time => {
+                        const btn = document.createElement('button');
+                        btn.className = 'btn btn-outline-dark rounded-0 px-4 py-2 m-1 fw-bold time-slot-btn';
+                        btn.innerText = time;
+                        btn.onclick = () => {
+                            // 1. Llenamos los datos ocultos del formulario
+                            document.getElementById('form_service_id').value = selectedServiceId;
+                            document.getElementById('form_staff_id').value = document.getElementById('booking_staff').value;
+                            document.getElementById('form_date').value = selectedDate;
+                            document.getElementById('form_time').value = time;
+                            
+                            // 2. Pasamos al Paso 3
+                            goToStep(3);
+                        };
+                        slotsGrid.appendChild(btn);
+                    });
+                } else {
+                    slotsGrid.innerHTML = `<p class="text-muted fw-bold"><i class="bi bi-calendar-x me-2"></i>${data.mensaje || 'Local cerrado.'}</p>`;
+                }
+
+            } catch (error) {
+                console.error("Error Fetch:", error);
+                slotsGrid.innerHTML = '<p class="text-danger">Hubo un problema de conexión con el calendario.</p>';
+            }
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

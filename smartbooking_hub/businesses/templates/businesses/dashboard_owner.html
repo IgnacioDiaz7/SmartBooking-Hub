@@ -10,6 +10,7 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
 
@@ -53,20 +54,15 @@
         <nav class="nav flex-column gap-3 px-4 mt-4">
             <a class="nav-link text-white-50 small {% if seccion_activa == 'resumen' %}active-tab{% endif %}"
                 href="?section=resumen">RESUMEN</a>
-
             <a class="nav-link text-white-50 small {% if seccion_activa == 'calendario' %}active-tab{% endif %}"
                 href="?section=calendario">CALENDARIO</a>
-
             <a class="nav-link text-white-50 small {% if seccion_activa == 'colaboradores' %}active-tab{% endif %}"
                 href="?section=colaboradores">COLABORADORES</a>
-
+            <a class="nav-link text-white-50 small {% if seccion_activa == 'servicios' %}active-tab{% endif %}" href="?section=servicios">SERVICIOS</a>
             <a class="nav-link text-white-50 small {% if seccion_activa == 'reportes' %}active-tab{% endif %}"
                 href="?section=reportes">REPORTES BI</a>
-
             <a class="nav-link text-white-50 small mt-4 border-top pt-4 border-secondary {% if seccion_activa == 'config' %}active-tab{% endif %}"
-                href="?section=config">
-                ⚙️ CONFIGURACIÓN
-            </a>
+                href="?section=config">⚙️ CONFIGURACIÓN</a>
         </nav>
 
         <div class="mt-auto p-4">
@@ -75,7 +71,6 @@
     </aside>
 
     <main class="main-content" style="margin-left: 250px; padding: 2rem;">
-
 
         {% if messages %}
         {% for message in messages %}
@@ -87,12 +82,26 @@
         {% endfor %}
         {% endif %}
 
+        <!-- ========================================== -->
+        <!-- VISTA 1: RESUMEN (SAAS) -->
+        <!-- ========================================== -->
         {% if seccion_activa == 'resumen' %}
-        <header class="d-flex justify-content-between align-items-center mb-5">
+        <header class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h2 class="fw-bold mb-0" style="color: #0A2647;">{% if business %}{{ business.name }}{% else %}Panel de
-                    Gestión{% endif %}</h2>
+                <h2 class="fw-bold mb-0" style="color: #0A2647;">{% if business %}{{ business.name }}{% else %}Panel de Gestión{% endif %}</h2>
                 <p class="text-muted small">Bienvenido al control operativo de su negocio</p>
+                <div class="alert bg-white border shadow-sm d-flex justify-content-between align-items-center p-3 mb-4 rounded-0">
+            <div>
+                <span class="badge bg-success-subtle text-success rounded-0 mb-1">ONLINE</span>
+                <p class="mb-0 small text-muted fw-bold">Enlace público de reservas para sus clientes:</p>
+                <a href="{% url 'public_booking' business.slug %}" target="_blank" class="fw-bold text-decoration-none" style="color: #0A2647;">
+                    {{ request.scheme }}://{{ request.get_host }}{% url 'public_booking' business.slug %}
+                </a>
+            </div>
+            <a href="{% url 'public_booking' business.slug %}" target="_blank" class="btn btn-sm text-white fw-bold rounded-0 px-3" style="background-color: #F58220;">
+                Ver mi Portal <i class="bi bi-box-arrow-up-right ms-1"></i>
+            </a>
+        </div>
             </div>
             <div class="text-end">
                 <span class="badge bg-white text-dark shadow-sm p-3 border fw-normal rounded-0">
@@ -100,39 +109,90 @@
                 </span>
             </div>
         </header>
-        <div class="row g-4 mt-1 mb-4">
-            <div class="col-12">
-                <div class="card shadow-sm p-4 bg-white rounded-0 border-0 border-top"
-                    style="border-top-width: 4px !important; border-top-color: #F58220 !important;">
-                    <h5 class="fw-bold mb-4" style="color: #0A2647;">🕒 Horario Operativo de la Semana</h5>
 
-                    <div class="d-flex flex-wrap gap-2 justify-content-between">
-                        {% for h in horarios %}
-                        <div class="p-3 border text-center rounded-0 bg-light" style="flex: 1; min-width: 110px;">
-                            <span class="d-block fw-bold text-uppercase small mb-2"
-                                style="color: #0A2647; letter-spacing: 1px;">
-                                {{ h.get_day_of_week_display }}
-                            </span>
+        <div class="alert border-0 shadow-sm d-flex align-items-center p-4 mb-4 rounded-0"
+            style="background-color: #fff8e1; border-left: 4px solid #F58220 !important;">
+            <i class="bi bi-shield-lock-fill text-warning fs-1 me-4"></i>
+            <div>
+                <h5 class="mb-1 fw-bold text-dark">Período de Evaluación Premium Activo</h5>
+                <p class="mb-0 text-dark" style="font-size: 0.95rem;">
+                    Disfruta de todas las herramientas avanzadas. Te quedan <strong class="fs-5 text-danger">{{ dias_restantes|default:"0" }} días</strong> de prueba gratuita del <span class="badge bg-dark rounded-0">Plan Profesional</span>.
+                    <br>
+                    <span class="text-muted small">Al finalizar, el cobro se procesará de forma segura en tu tarjeta terminada en <strong>{{ ultimos_digitos|default:"XXXX" }}</strong>.</span>
+                </p>
+            </div>
+        </div>
 
-                            {% if h.is_open %}
-                            <span class="badge bg-white text-dark border shadow-sm px-2 py-1 mb-1">Abierto</span>
-                            <span class="d-block small text-muted fw-semibold mt-1">
-                                {{ h.open_time|time:"H:i" }} - {{ h.close_time|time:"H:i" }}
-                            </span>
-                            {% else %}
-                            <span
-                                class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1 mb-1">Cerrado</span>
-                            <span class="d-block small text-muted fw-semibold mt-1">Sin atención</span>
-                            {% endif %}
+        <div class="row g-4 mb-4">
+            <div class="col-lg-5">
+                <div class="card border-0 shadow-sm rounded-0 h-100" style="border-top: 4px solid #0A2647 !important;">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-people-fill fs-4 me-2" style="color: #0A2647;"></i>
+                            <h5 class="fw-bold mb-0" style="color: #0A2647;">Capacidad de Personal</h5>
                         </div>
-                        {% endfor %}
-                    </div>
+                        <p class="text-muted small mb-4">Control de licencias activas según tu plan actual.</p>
 
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="fw-bold text-dark">{{ staff_count|default:"0" }} Especialistas</span>
+                            <span class="text-muted small fw-bold">Límite: {{ max_staff|default:"4" }}</span>
+                        </div>
+
+                        <div class="progress mb-3 rounded-0" style="height: 10px; background-color: #e9ecef;">
+                            <div class="progress-bar" role="progressbar"
+                                style="width: {{ staff_percentage|floatformat:0 }}%; background-color: #F58220;"
+                                aria-valuenow="{{ staff_percentage|floatformat:0 }}" aria-valuemin="0"
+                                aria-valuemax="100"></div>
+                        </div>
+
+                        <div class="alert alert-light border rounded-0 small py-2 px-3 mb-0">
+                            <i class="bi bi-info-circle text-info me-2"></i>Aún puedes registrar a <strong>{{ cupos_libres|default:"0" }} colaboradores más</strong> gratis.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-7">
+                <div class="card border-0 shadow-sm rounded-0 h-100" style="background-color: #0A2647; color: white;">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-4">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-graph-up-arrow text-white fs-4 me-2"></i>
+                                <h5 class="fw-bold mb-0">Cierre de Comisiones Automatizado</h5>
+                            </div>
+                            <span class="badge bg-warning text-dark rounded-0 fw-bold">MÓDULO PRO</span>
+                        </div>
+
+                        <div class="row text-center mb-4 g-3">
+                            <div class="col-6">
+                                <div class="p-3 border border-secondary rounded-0"
+                                    style="background-color: rgba(255,255,255,0.05);">
+                                    <span class="d-block small text-white-50 text-uppercase fw-bold mb-1">Procesado en Caja</span>
+                                    <h3 class="fw-bold mb-0">${{ comisiones.total_procesado_mes|default:"0" }}</h3>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="p-3 border border-secondary rounded-0"
+                                    style="background-color: rgba(255,255,255,0.05);">
+                                    <span class="d-block small text-white-50 text-uppercase fw-bold mb-1">Pago a Especialistas</span>
+                                    <h3 class="fw-bold mb-0" style="color: #F58220;">${{ comisiones.comisiones_estilistas|default:"0" }}</h3>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center p-3 border border-secondary rounded-0"
+                            style="background-color: rgba(255,255,255,0.05);">
+                            <i class="bi bi-lightning-charge-fill text-warning fs-3 me-3"></i>
+                            <p class="mb-0 small text-white-50" style="line-height: 1.4;">
+                                <strong>Algoritmo en Acción:</strong> Este mes le has ahorrado a tu negocio un estimado de <strong class="text-white">{{ comisiones.tiempo_ahorrado_horas|default:"0" }} horas de trabajo en planillas</strong> gracias al cálculo automático.
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="row g-4 mb-5">
+        <div class="row g-4 mb-4">
             <div class="col-md-4">
                 <div class="card p-4 shadow-sm bg-white h-100 rounded-0 border-0"
                     style="border-left: 4px solid #0A2647 !important;">
@@ -159,6 +219,36 @@
             </div>
         </div>
 
+        <div class="row g-4 mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm p-4 bg-white rounded-0 border-0 border-top"
+                    style="border-top-width: 4px !important; border-top-color: #F58220 !important;">
+                    <h5 class="fw-bold mb-4" style="color: #0A2647;">🕒 Horario Operativo de la Semana</h5>
+                    <div class="d-flex flex-wrap gap-2 justify-content-between">
+                        {% for h in horarios %}
+                        <div class="p-3 border text-center rounded-0 bg-light" style="flex: 1; min-width: 110px;">
+                            <span class="d-block fw-bold text-uppercase small mb-2"
+                                style="color: #0A2647; letter-spacing: 1px;">
+                                {{ h.get_day_of_week_display }}
+                            </span>
+                            {% if h.is_open %}
+                            <span
+                                class="badge bg-white text-dark border shadow-sm px-2 py-1 mb-1 rounded-0">Abierto</span>
+                            <span class="d-block small text-muted fw-semibold mt-1">
+                                {{ h.open_time|time:"H:i" }} - {{ h.close_time|time:"H:i" }}
+                            </span>
+                            {% else %}
+                            <span
+                                class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1 mb-1 rounded-0">Cerrado</span>
+                            <span class="d-block small text-muted fw-semibold mt-1">Sin atención</span>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="row g-4">
             <div class="col-lg-8">
                 <div class="card shadow-sm p-4 h-100 bg-white rounded-0 border-0">
@@ -174,14 +264,22 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                {% for cita in citas_recientes %}
                                 <tr>
-                                    <td class="fw-bold">Ignacio Díaz</td>
-                                    <td class="text-muted">Corte de Barba Premium</td>
-                                    <td>14:30 hrs</td>
-                                    <td><span class="badge"
-                                            style="background-color: rgba(10, 38, 71, 0.1); color: #0A2647;">Confirmado</span>
+                                    <td class="fw-bold">{{ cita.client.first_name|default:"Cliente" }} {{ cita.client.last_name|default:"" }}</td>
+                                    <td class="text-muted">{{ cita.service.name }}</td>
+                                    <td>{{ cita.date|date:"d M Y" }} - {{ cita.date|time:"H:i" }}</td>
+                                    <td>
+                                        <span class="badge rounded-0 {% if cita.status == 'pending' %}bg-warning text-dark{% elif cita.status == 'completed' %}bg-success text-white{% else %}bg-danger text-white{% endif %}">
+                                            {{ cita.get_status_display }}
+                                        </span>
                                     </td>
                                 </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-5 text-muted">No hay reservas recientes.</td>
+                                </tr>
+                                {% endfor %}
                             </tbody>
                         </table>
                     </div>
@@ -204,7 +302,7 @@
         {% endif %}
 
         <!-- ========================================== -->
-        <!-- VISTA 2: PESTAÑA CONFIGURACIÓN (EDITAR PREFERENCIAS) -->
+        <!-- VISTA 2: CONFIGURACIÓN -->
         <!-- ========================================== -->
         {% if seccion_activa == 'config' %}
         <header class="mb-5">
@@ -215,15 +313,10 @@
         <form method="POST" action="{% url 'dashboard' %}">
             {% csrf_token %}
             <input type="hidden" name="action" value="update_config">
-
-            <!-- INICIO DE LA FILA (ROW) QUE MANTIENE LAS TARJETAS LADO A LADO -->
             <div class="row g-4">
-
-                <!-- COLUMNA IZQUIERDA (5 espacios de 12) -->
                 <div class="col-md-5">
                     <div class="card shadow-sm p-4 bg-white rounded-0 border-0 h-100">
                         <h5 class="fw-bold mb-4" style="color: #0A2647;">Datos Administrativos</h5>
-
                         <div class="row g-2 mb-3 pb-3 border-bottom">
                             <div class="col-6">
                                 <label class="form-label small fw-bold text-muted">NOMBRE (DUEÑO)</label>
@@ -236,11 +329,10 @@
                                     value="{{ request.user.last_name }}">
                             </div>
                         </div>
-
                         <div class="mb-3 mt-2">
                             <label class="form-label small fw-bold text-muted">NOMBRE DEL NEGOCIO</label>
-                            <input type="text" class="form-control rounded-0 bg-light" value="{{ business.name }}"
-                                readonly>
+                            <input type="text" name="business_name" class="form-control rounded-0"
+                                value="{{ business.name }}" required>
                         </div>
                         <div class="mb-3">
                             <label class="form-label small fw-bold text-muted">TELÉFONO CORPORATIVO</label>
@@ -259,9 +351,7 @@
                         </div>
                     </div>
                 </div>
-                <!-- FIN COLUMNA IZQUIERDA -->
 
-                <!-- COLUMNA DERECHA (7 espacios de 12) -->
                 <div class="col-md-7">
                     <div class="card shadow-sm p-4 bg-white rounded-0 border-0 h-100">
                         <h5 class="fw-bold mb-4" style="color: #0A2647;">Horarios de Atención</h5>
@@ -306,39 +396,36 @@
                         </div>
                     </div>
                 </div>
-                <!-- FIN COLUMNA DERECHA -->
-
-                <!-- BOTÓN DE GUARDADO GLOBALES (Ocupa el 100% de la fila debajo de las tarjetas) -->
                 <div class="col-12 mt-4 text-end">
                     <button type="submit" class="btn text-white fw-bold rounded-0 px-5 py-3 shadow-sm"
                         style="background-color: #F58220; letter-spacing: 1px;">
                         GUARDAR CAMBIOS GLOBALES
                     </button>
                 </div>
-
             </div>
-            <!-- FIN DE LA FILA (ROW) -->
         </form>
+
         <div class="row g-4 mt-3">
             <div class="col-md-6">
                 <div class="card shadow-sm p-4 bg-white rounded-0 border-0 h-100">
                     <h5 class="fw-bold mb-1" style="color: #0A2647;">🔒 Seguridad de la Cuenta</h5>
                     <p class="text-muted small mb-4">Actualice su clave de acceso periódicamente</p>
-                    
                     <form method="POST" action="{% url 'dashboard' %}">
                         {% csrf_token %}
                         <input type="hidden" name="action" value="update_security">
                         <input type="hidden" name="tipo_cambio" value="password">
-                        
                         <div class="mb-3">
                             <label class="form-label small fw-bold text-muted">CONTRASEÑA ACTUAL</label>
-                            <input type="password" name="current_password" class="form-control rounded-0" placeholder="••••••••" required>
+                            <input type="password" name="current_password" class="form-control rounded-0"
+                                placeholder="••••••••" required>
                         </div>
                         <div class="mb-3">
                             <label class="form-label small fw-bold text-muted">NUEVA CONTRASEÑA</label>
-                            <input type="password" name="new_password" class="form-control rounded-0" placeholder="Mínimo 8 caracteres" required>
+                            <input type="password" name="new_password" class="form-control rounded-0"
+                                placeholder="Mínimo 8 caracteres" required>
                         </div>
-                        <button type="submit" class="btn text-white btn-sm rounded-0 w-100 py-2 fw-bold" style="background-color: #0A2647;">MODIFICAR CONTRASEÑA</button>
+                        <button type="submit" class="btn text-white btn-sm rounded-0 w-100 py-2 fw-bold"
+                            style="background-color: #0A2647;">MODIFICAR CONTRASEÑA</button>
                     </form>
                 </div>
             </div>
@@ -347,54 +434,103 @@
                 <div class="card shadow-sm p-4 bg-white rounded-0 border-0 h-100">
                     <h5 class="fw-bold mb-1" style="color: #0A2647;">📧 Correo de Acceso</h5>
                     <p class="text-muted small mb-4">Su correo actual es: <strong class="text-dark">{{ request.user.email }}</strong></p>
-                    
                     <form method="POST" action="{% url 'dashboard' %}">
                         {% csrf_token %}
                         <input type="hidden" name="action" value="update_security">
                         <input type="hidden" name="tipo_cambio" value="email">
-                        
                         <div class="mb-3">
                             <label class="form-label small fw-bold text-muted">NUEVO EMAIL CORPORATIVO</label>
-                            <input type="email" name="nuevo_email" class="form-control rounded-0" placeholder="nuevo@correo.com" required>
-                            <div class="form-text text-danger small style-italic">⚠️ Nota: Cambiar su correo cerrará su sesión y requerirá que active la cuenta nuevamente desde su nueva bandeja de entrada.</div>
+                            <input type="email" name="nuevo_email" class="form-control rounded-0"
+                                placeholder="nuevo@correo.com" required>
+                            <div class="form-text text-danger small style-italic">⚠️ Nota: Cambiar su correo cerrará su
+                                sesión y requerirá que active la cuenta nuevamente.</div>
                         </div>
-                        <button type="submit" class="btn text-white btn-sm rounded-0 w-100 py-2 fw-bold" style="background-color: #F58220;">ACTUALIZAR Y VERIFICAR EMAIL</button>
+                        <button type="submit" class="btn text-white btn-sm rounded-0 w-100 py-2 fw-bold"
+                            style="background-color: #F58220;">ACTUALIZAR Y VERIFICAR EMAIL</button>
                     </form>
                 </div>
             </div>
         </div>
         {% endif %}
 
-       
         <!-- ========================================== -->
-        <!-- VISTA 3: CALENDARIO DE RESERVAS            -->
+        <!-- VISTA 3: CALENDARIO -->
         <!-- ========================================== -->
         {% if seccion_activa == 'calendario' %}
-        <header class="mb-5 d-flex justify-content-between align-items-center">
-            <div>
-                <h2 class="fw-bold mb-0" style="color: #0A2647;">📅 Calendario de Reservas</h2>
-                <p class="text-muted small">Gestione la agenda diaria de su establecimiento</p>
-            </div>
-            <button class="btn btn-outline-dark rounded-0 fw-bold shadow-sm">Sincronizar Google Calendar</button>
+        <header class="mb-5">
+            <h2 class="fw-bold mb-0" style="color: #0A2647;">📅 Calendario de Reservas</h2>
+            <p class="text-muted small">Gestione las citas de su local y actualice los estados para sus reportes.</p>
         </header>
 
-        <div class="card shadow-sm p-5 bg-white rounded-0 border-0 h-100 text-center"
-            style="border-top: 4px solid #0A2647 !important;">
-            <div class="py-5">
-                <h4 class="text-muted fw-bold mb-3">Módulo de Agenda Semanal</h4>
-                <p class="text-muted small mx-auto" style="max-width: 500px;">
-                    Aquí integraremos la vista interactiva del calendario. Podrá arrastrar citas, ver bloqueos de tiempo
-                    y gestionar las asignaciones por cada trabajador.
-                </p>
-                <div class="spinner-border text-secondary mt-4" role="status"><span
-                        class="visually-hidden">Loading...</span></div>
+        <div class="card shadow-sm bg-white rounded-0 border-0 h-100">
+            <div class="table-responsive">
+                <table class="table align-middle table-hover mb-0">
+                    <thead class="bg-light">
+                        <tr class="text-muted small text-uppercase" style="letter-spacing: 1px;">
+                            <th class="py-3 px-4">Fecha y Hora</th>
+                            <th class="py-3">Cliente</th>
+                            <th class="py-3">Servicio</th>
+                            <th class="py-3">Especialista</th>
+                            <th class="py-3 text-end px-4">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cita in citas_calendario %}
+                        <tr>
+                            <td class="px-4 py-3">
+                                <span class="fw-bold d-block" style="color: #0A2647;">{{ cita.date|date:"d de M, Y" }}</span>
+                                <span class="badge bg-light text-dark border rounded-0"><i class="bi bi-clock me-1"></i>{{ cita.date|time:"H:i" }} hrs</span>
+                            </td>
+                            <td>
+                                <span class="fw-bold">{{ cita.client.first_name }} {{ cita.client.last_name }}</span><br>
+                                <small class="text-muted"><i class="bi bi-telephone-fill me-1"></i>{{ cita.client.phone }}</small>
+                            </td>
+                            <td>
+                                <span class="d-block">{{ cita.service.name }}</span>
+                                <small class="text-success fw-bold">${{ cita.price|floatformat:0 }}</small>
+                            </td>
+                            <td>
+                                {% if cita.staff %}
+                                    {{ cita.staff.first_name }} {{ cita.staff.last_name }}
+                                {% else %}
+                                    <span class="text-muted fst-italic">Sin asignar</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end px-4">
+                                <form method="POST" action="{% url 'dashboard' %}" class="d-inline-flex align-items-center">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="update_status">
+                                    <input type="hidden" name="cita_id" value="{{ cita.id }}">
+                                    
+                                    <select name="status" class="form-select form-select-sm rounded-0 me-2 
+                                        {% if cita.status == 'pending' %}border-warning text-warning fw-bold
+                                        {% elif cita.status == 'completed' %}border-success text-success fw-bold
+                                        {% else %}border-danger text-danger fw-bold{% endif %}" 
+                                        style="width: 130px; cursor: pointer;" onchange="this.form.submit()">
+                                        
+                                        <option value="pending" {% if cita.status == 'pending' %}selected{% endif %}>⏳ Pendiente</option>
+                                        <option value="completed" {% if cita.status == 'completed' %}selected{% endif %}>✅ Completado</option>
+                                        <option value="cancelled" {% if cita.status == 'cancelled' %}selected{% endif %}>❌ No Asistió</option>
+                                    </select>
+                                </form>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <i class="bi bi-calendar-x fs-1 d-block mb-3"></i>
+                                No hay citas programadas desde el día de hoy en adelante.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
         {% endif %}
 
-
         <!-- ========================================== -->
-        <!-- VISTA 4: GESTIÓN DE COLABORADORES          -->
+        <!-- VISTA 4: COLABORADORES -->
         <!-- ========================================== -->
         {% if seccion_activa == 'colaboradores' %}
         <header class="mb-5 d-flex justify-content-between align-items-center">
@@ -402,7 +538,9 @@
                 <h2 class="fw-bold mb-0" style="color: #0A2647;">👥 Equipo de Trabajo</h2>
                 <p class="text-muted small">Administre a sus estilistas, barberos y staff administrativo</p>
             </div>
-            <button class="btn text-white fw-bold rounded-0 shadow-sm px-4" style="background-color: #F58220; letter-spacing: 1px;" data-bs-toggle="modal" data-bs-target="#addColabModal">
+            <button class="btn text-white fw-bold rounded-0 shadow-sm px-4"
+                style="background-color: #F58220; letter-spacing: 1px;" data-bs-toggle="modal"
+                data-bs-target="#addColabModal">
                 + NUEVO COLABORADOR
             </button>
         </header>
@@ -415,6 +553,7 @@
                             <th class="py-3 px-4">Nombre y Contacto</th>
                             <th class="py-3">Rol de Sistema</th>
                             <th class="py-3 text-center">Estado</th>
+                            <th class="py-3 text-center">¿Recibe Reservas?</th>
                             <th class="py-3 text-end px-4">Acciones</th>
                         </tr>
                     </thead>
@@ -426,104 +565,167 @@
                                 <small class="text-muted">{{ colab.user.email }}</small>
                             </td>
                             <td>
-                                <span class="badge {% if colab.business_role == 'owner' %}bg-dark{% elif colab.business_role == 'manager' %}bg-primary{% else %}bg-secondary{% endif %} rounded-0">
+                                <span
+                                    class="badge {% if colab.business_role == 'owner' %}bg-dark{% elif colab.business_role == 'manager' %}bg-primary{% else %}bg-secondary{% endif %} rounded-0">
                                     {{ colab.get_business_role_display }}
                                 </span>
                             </td>
                             <td class="text-center">
                                 {% if colab.user.is_active %}
-                                    <span class="badge bg-success-subtle text-success rounded-0">Activo</span>
+                                <span class="badge bg-success-subtle text-success rounded-0">Activo</span>
                                 {% else %}
-                                    <span class="badge bg-danger-subtle text-danger rounded-0">Inactivo</span>
+                                <span class="badge bg-danger-subtle text-danger rounded-0">Inactivo</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                {% if rol_usuario == 'owner' or rol_usuario == 'manager' %}
+                                <form method="POST" action="{% url 'dashboard' %}" class="d-inline-block m-0">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="toggle_services">
+                                    <input type="hidden" name="colab_id" value="{{ colab.id }}">
+                                    
+                                    <div class="form-check form-switch d-flex justify-content-center align-items-center m-0">
+                                        <input class="form-check-input" type="checkbox" role="switch" style="width: 2.5em; height: 1.25em; cursor: pointer;" 
+                                               onchange="this.form.submit()" {% if colab.provides_services %}checked{% endif %}>
+                                        <label class="form-check-label ms-2 small fw-bold {% if colab.provides_services %}text-success{% else %}text-muted{% endif %}">
+                                            {% if colab.provides_services %}SI{% else %}NO{% endif %}
+                                        </label>
+                                    </div>
+                                </form>
+                                {% else %}
+                                    <span class="small fw-bold {% if colab.provides_services %}text-success{% else %}text-muted{% endif %}">
+                                        {% if colab.provides_services %}SI{% else %}NO{% endif %}
+                                    </span>
                                 {% endif %}
                             </td>
                             <td class="text-end px-4">
-                                {% if rol_usuario == 'owner' or rol_usuario == 'manager' and colab.business_role != 'owner' or rol_usuario == 'staff' and colab.business_role == 'staff' %}
-                                    
-                                    <button class="btn btn-sm btn-light border rounded-0 text-muted me-1" data-bs-toggle="modal" data-bs-target="#editColabModal{{ colab.id }}">Editar</button>
-                                    <button class="btn btn-sm btn-outline-danger rounded-0" data-bs-toggle="modal" data-bs-target="#deleteColabModal{{ colab.id }}">Eliminar</button>
+                                {% if rol_usuario == 'owner' or rol_usuario == 'manager' and colab.business_role != 'owner' or rol_usuario == 'staff' and colab.user.id == request.user.id %}
+                                <button class="btn btn-sm btn-light border rounded-0 text-muted me-1"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#editColabModal{{ colab.id }}">Editar</button>
+                                
+                                {% if colab.business_role != 'owner' %}
+                                <button class="btn btn-sm btn-outline-danger rounded-0" data-bs-toggle="modal"
+                                    data-bs-target="#deleteColabModal{{ colab.id }}">Eliminar</button>
+                                {% endif %}
                                 
                                 {% else %}
-                                    
-                                    <span class="badge bg-light text-secondary border rounded-0 px-2 py-1" title="No tiene permisos para editar a este usuario">
-                                        🔒 Restringido
-                                    </span>
-                                
+                                <span class="badge bg-light text-secondary border rounded-0 px-2 py-1"
+                                    title="No tiene permisos para editar a este usuario">
+                                    🔒 Restringido
+                                </span>
                                 {% endif %}
 
-                                <div class="modal fade text-start" id="editColabModal{{ colab.id }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal fade text-start" id="editColabModal{{ colab.id }}" tabindex="-1"
+                                    aria-hidden="true">
                                     <div class="modal-dialog modal-dialog-centered">
                                         <div class="modal-content rounded-0 border-0 shadow">
                                             <div class="modal-header text-white" style="background-color: #0A2647;">
                                                 <h5 class="modal-title fw-bold">Editar Colaborador</h5>
-                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                <button type="button" class="btn-close btn-close-white"
+                                                    data-bs-dismiss="modal" aria-label="Close"></button>
                                             </div>
                                             <form method="POST" action="{% url 'dashboard' %}">
                                                 {% csrf_token %}
                                                 <input type="hidden" name="action" value="edit_colaborador">
                                                 <input type="hidden" name="ub_id" value="{{ colab.id }}">
-                                                
                                                 <div class="modal-body p-4 bg-light">
                                                     <div class="mb-3">
                                                         <label class="form-label small fw-bold text-muted">CORREO ELECTRÓNICO</label>
-                                                        <input type="email" class="form-control rounded-0 bg-white" value="{{ colab.user.email }}" readonly disabled>
+                                                        <input type="email" class="form-control rounded-0 bg-white"
+                                                            value="{{ colab.user.email }}" readonly disabled>
                                                     </div>
                                                     <div class="row g-2 mb-3">
                                                         <div class="col-6">
-                                                            <label class="form-label small fw-bold text-muted">NOMBRE</label>
-                                                            <input type="text" name="first_name" class="form-control rounded-0" value="{{ colab.user.first_name }}" required>
+                                                            <label
+                                                                class="form-label small fw-bold text-muted">NOMBRE</label>
+                                                            <input type="text" name="first_name"
+                                                                class="form-control rounded-0"
+                                                                value="{{ colab.user.first_name }}" required>
                                                         </div>
                                                         <div class="col-6">
-                                                            <label class="form-label small fw-bold text-muted">APELLIDO</label>
-                                                            <input type="text" name="last_name" class="form-control rounded-0" value="{{ colab.user.last_name }}" required>
+                                                            <label
+                                                                class="form-label small fw-bold text-muted">APELLIDO</label>
+                                                            <input type="text" name="last_name"
+                                                                class="form-control rounded-0"
+                                                                value="{{ colab.user.last_name }}" required>
                                                         </div>
                                                     </div>
                                                     <div class="mb-3">
                                                         <label class="form-label small fw-bold text-muted">NIVEL DE ACCESO (ROL)</label>
-                                                        <select name="role" class="form-select rounded-0" required>
+                                                        <select name="role" class="form-select rounded-0" required {% if colab.business_role == 'owner' %}disabled{% endif %}>
                                                             <option value="staff" {% if colab.business_role == 'staff' %}selected{% endif %}>Staff (Visualización Básica)</option>
                                                             <option value="manager" {% if colab.business_role == 'manager' %}selected{% endif %}>Administrador (Control Total)</option>
                                                             <option value="owner" {% if colab.business_role == 'owner' %}selected{% endif %}>Dueño (Propiedad Absoluta)</option>
                                                         </select>
+                                                        {% if colab.business_role == 'owner' %}
+                                                            <input type="hidden" name="role" value="owner">
+                                                        {% endif %}
                                                     </div>
+                                                    
                                                     <div class="mb-2 p-3 border bg-white d-flex justify-content-between align-items-center">
                                                         <div>
-                                                            <label class="fw-bold small mb-0 d-block" style="color: #0A2647;">ESTADO OPERATIVO</label>
-                                                            <small class="text-muted text-xs">Si se desactiva, perderá acceso inmediato.</small>
+                                                            <label class="fw-bold small mb-0 d-block" style="color: #0A2647;">AGENDA DE RESERVAS</label>
+                                                            <small class="text-muted text-xs">Permite a los clientes agendar citas con esta persona.</small>
                                                         </div>
                                                         <div class="form-check form-switch mb-0">
-                                                            <input class="form-check-input" type="checkbox" role="switch" name="is_active" style="transform: scale(1.3); cursor: pointer;" {% if colab.user.is_active %}checked{% endif %}>
+                                                            <input class="form-check-input" type="checkbox" role="switch" name="provides_services" style="transform: scale(1.3); cursor: pointer;" {% if colab.provides_services %}checked{% endif %}>
+                                                        </div>
+                                                    </div>
+
+                                                    <div
+                                                        class="mb-2 p-3 border bg-white d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <label class="fw-bold small mb-0 d-block"
+                                                                style="color: #0A2647;">ESTADO OPERATIVO</label>
+                                                            <small class="text-muted text-xs">Si se desactiva, perderá acceso al sistema.</small>
+                                                        </div>
+                                                        <div class="form-check form-switch mb-0">
+                                                            <input class="form-check-input" type="checkbox"
+                                                                role="switch" name="is_active"
+                                                                style="transform: scale(1.3); cursor: pointer;" {% if colab.user.is_active %}checked{% endif %} {% if colab.user.id == request.user.id %}disabled{% endif %}>
+                                                            {% if colab.user.id == request.user.id %}
+                                                                <input type="hidden" name="is_active" value="on">
+                                                            {% endif %}
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <div class="modal-footer border-top-0 bg-white">
-                                                    <button type="button" class="btn btn-light rounded-0" data-bs-dismiss="modal">Cancelar</button>
-                                                    <button type="submit" class="btn text-white rounded-0 px-4" style="background-color: #F58220;">Actualizar Datos</button>
+                                                    <button type="button" class="btn btn-light rounded-0"
+                                                        data-bs-dismiss="modal">Cancelar</button>
+                                                    <button type="submit" class="btn text-white rounded-0 px-4"
+                                                        style="background-color: #F58220;">Actualizar Datos</button>
                                                 </div>
                                             </form>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div class="modal fade text-start" id="deleteColabModal{{ colab.id }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal fade text-start" id="deleteColabModal{{ colab.id }}" tabindex="-1"
+                                    aria-hidden="true">
                                     <div class="modal-dialog modal-dialog-centered modal-sm">
                                         <div class="modal-content rounded-0 border-0 shadow">
                                             <div class="modal-header bg-danger text-white">
-                                                <h5 class="modal-title fw-bold" style="font-size: 1rem;">⚠️ Confirmar</h5>
-                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                <h5 class="modal-title fw-bold" style="font-size: 1rem;">⚠️ Confirmar
+                                                </h5>
+                                                <button type="button" class="btn-close btn-close-white"
+                                                    data-bs-dismiss="modal" aria-label="Close"></button>
                                             </div>
                                             <form method="POST" action="{% url 'dashboard' %}">
                                                 {% csrf_token %}
                                                 <input type="hidden" name="action" value="delete_colaborador">
                                                 <input type="hidden" name="ub_id" value="{{ colab.id }}">
-                                                
                                                 <div class="modal-body p-4 bg-light text-center">
                                                     <p class="mb-0 small">¿Desea eliminar a <strong>{{ colab.user.first_name }} {{ colab.user.last_name }}</strong>?</p>
-                                                    <small class="text-danger d-block mt-3 fw-bold" style="font-size: 0.75rem; text-transform: uppercase;">Esto destruirá el usuario permanentemente.</small>
+                                                    <small class="text-danger d-block mt-3 fw-bold"
+                                                        style="font-size: 0.75rem; text-transform: uppercase;">Esto removerá su acceso al local.</small>
                                                 </div>
-                                                <div class="modal-footer border-top-0 bg-white justify-content-center p-3">
-                                                    <button type="button" class="btn btn-sm btn-light rounded-0" data-bs-dismiss="modal">Cancelar</button>
-                                                    <button type="submit" class="btn btn-sm btn-danger rounded-0 px-3 fw-bold">Sí, Eliminar</button>
+                                                <div
+                                                    class="modal-footer border-top-0 bg-white justify-content-center p-3">
+                                                    <button type="button" class="btn btn-sm btn-light rounded-0"
+                                                        data-bs-dismiss="modal">Cancelar</button>
+                                                    <button type="submit"
+                                                        class="btn btn-sm btn-danger rounded-0 px-3 fw-bold">Sí, Eliminar</button>
                                                 </div>
                                             </form>
                                         </div>
@@ -532,10 +734,10 @@
                             </td>
                         </tr>
                         {% endfor %}
-                        
+
                         {% if not colaboradores %}
                         <tr>
-                            <td colspan="4" class="text-center py-5 text-muted">
+                            <td colspan="5" class="text-center py-5 text-muted">
                                 Aún no ha registrado colaboradores en su equipo.
                             </td>
                         </tr>
@@ -550,18 +752,18 @@
                 <div class="modal-content rounded-0 border-0 shadow">
                     <div class="modal-header text-white" style="background-color: #0A2647;">
                         <h5 class="modal-title fw-bold">Registrar Nuevo Colaborador</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
                     </div>
                     <form method="POST" action="{% url 'dashboard' %}">
                         {% csrf_token %}
                         <input type="hidden" name="action" value="add_colaborador">
-                        
                         <div class="modal-body p-4 bg-light">
                             <p class="text-muted small mb-4">Complete los datos para invitar a un nuevo miembro a la plataforma operativa.</p>
-                            
                             <div class="mb-3">
                                 <label class="form-label small fw-bold text-muted text-uppercase">Correo Electrónico</label>
-                                <input type="email" name="email" class="form-control rounded-0" placeholder="ejemplo@correo.com" required>
+                                <input type="email" name="email" class="form-control rounded-0"
+                                    placeholder="ejemplo@correo.com" required>
                             </div>
                             <div class="row g-2 mb-3">
                                 <div class="col-6">
@@ -581,10 +783,23 @@
                                     <option value="manager">Administrador de Local</option>
                                 </select>
                             </div>
+                            
+                            <div class="mb-2 p-3 border bg-white d-flex justify-content-between align-items-center">
+                                <div>
+                                    <label class="fw-bold small mb-0 d-block" style="color: #0A2647;">AGENDA DE RESERVAS</label>
+                                    <small class="text-muted text-xs">Permite a los clientes agendar citas con esta persona.</small>
+                                </div>
+                                <div class="form-check form-switch mb-0">
+                                    <input class="form-check-input" type="checkbox" role="switch" name="provides_services" style="transform: scale(1.3); cursor: pointer;" checked>
+                                </div>
+                            </div>
+                            
                         </div>
                         <div class="modal-footer border-top-0 bg-white">
-                            <button type="button" class="btn btn-light rounded-0" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn text-white rounded-0 px-4" style="background-color: #0A2647;">Añadir al Equipo</button>
+                            <button type="button" class="btn btn-light rounded-0"
+                                data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn text-white rounded-0 px-4"
+                                style="background-color: #0A2647;">Añadir al Equipo</button>
                         </div>
                     </form>
                 </div>
@@ -592,9 +807,118 @@
         </div>
         {% endif %}
 
+        <!-- ========================================== -->
+        <!-- VISTA X: SERVICIOS -->
+        <!-- ========================================== -->
+        {% if seccion_activa == 'servicios' %}
+        <header class="mb-5 d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="fw-bold mb-0" style="color: #0A2647;">✂️ Catálogo de Servicios</h2>
+                <p class="text-muted small">Defina sus servicios, categorías y duraciones para la agenda online.</p>
+            </div>
+            <button class="btn text-white fw-bold rounded-0 shadow-sm px-4" style="background-color: #F58220; letter-spacing: 1px;" data-bs-toggle="modal" data-bs-target="#addServiceModal">
+                + NUEVO SERVICIO
+            </button>
+        </header>
+
+        <div class="card shadow-sm bg-white rounded-0 border-0 h-100">
+            <div class="table-responsive">
+                <table class="table align-middle table-hover mb-0">
+                    <thead class="bg-light">
+                        <tr class="text-muted small text-uppercase" style="letter-spacing: 1px;">
+                            <th class="py-3 px-4">Servicio</th>
+                            <th class="py-3">Categoría</th>
+                            <th class="py-3 text-center">Duración</th>
+                            <th class="py-3 text-center">Valor</th>
+                            <th class="py-3 text-end px-4">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in servicios %}
+                        <tr>
+                            <td class="px-4 py-3">
+                                <span class="fw-bold d-block" style="color: #0A2647;">{{ s.name }}</span>
+                                {% if s.description %}<small class="text-muted" style="font-size: 0.75rem;">{{ s.description|truncatechars:50 }}</small>{% endif %}
+                            </td>
+                            <td><span class="badge bg-secondary-subtle text-secondary rounded-0">{{ s.category|default:"General" }}</span></td>
+                            <td class="text-center"><span class="badge bg-light text-dark border rounded-0">{{ s.duration_minutes }} min</span></td>
+                            <td class="text-success fw-bold text-center">${{ s.price|floatformat:0 }}</td>
+                            <td class="text-end px-4">
+                                <form method="POST" action="{% url 'dashboard' %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="delete_service">
+                                    <input type="hidden" name="service_id" value="{{ s.id }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-0">Eliminar</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                No hay servicios registrados. Añada su primer servicio para habilitar las reservas online.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Modal Añadir Servicio -->
+        <div class="modal fade" id="addServiceModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content rounded-0 border-0 shadow">
+                    <div class="modal-header text-white" style="background-color: #0A2647;">
+                        <h5 class="modal-title fw-bold">Registrar Nuevo Servicio</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form method="POST" action="{% url 'dashboard' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="add_service">
+                        <div class="modal-body p-4 bg-light">
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted text-uppercase">Nombre del Servicio</label>
+                                <input type="text" name="name" class="form-control rounded-0" placeholder="Ej: Corte y Barba Premium" required>
+                            </div>
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <label class="form-label small fw-bold text-muted text-uppercase">Categoría</label>
+                                    <input type="text" name="category" class="form-control rounded-0" placeholder="Ej: Barbería">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small fw-bold text-muted text-uppercase">Precio ($)</label>
+                                    <input type="number" name="price" step="0.01" class="form-control rounded-0" placeholder="15000" min="0" required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted text-uppercase">Duración Estimada</label>
+                                <select name="duration_minutes" class="form-select rounded-0" required>
+                                    <option value="15">15 minutos</option>
+                                    <option value="30" selected>30 minutos</option>
+                                    <option value="45">45 minutos</option>
+                                    <option value="60">1 hora</option>
+                                    <option value="90">1 hora y media</option>
+                                    <option value="120">2 horas</option>
+                                    <option value="180">3 horas</option>
+                                </select>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label small fw-bold text-muted text-uppercase">Descripción (Opcional)</label>
+                                <textarea name="description" class="form-control rounded-0" rows="2" placeholder="Detalle lo que incluye el servicio..."></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer border-top-0 bg-white">
+                            <button type="button" class="btn btn-light rounded-0" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn text-white rounded-0 px-4" style="background-color: #F58220;">Guardar Servicio</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endif %}
 
         <!-- ========================================== -->
-        <!-- VISTA 5: REPORTES E INTELIGENCIA (BI)      -->
+        <!-- VISTA 5: REPORTES -->
         <!-- ========================================== -->
         {% if seccion_activa == 'reportes' %}
         <header class="mb-5">
@@ -626,6 +950,7 @@
         </div>
         {% endif %}
 
+        <!-- ONBOARDING MODAL -->
         {% if necesita_onboarding %}
         <div class="modal fade" id="onboardingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
             aria-hidden="true">
@@ -637,50 +962,37 @@
                     <form method="POST" action="{% url 'dashboard' %}">
                         {% csrf_token %}
                         <div class="modal-body p-5 bg-light">
-                            <p class="text-muted mb-4 small">Detectamos que su cuenta es nueva. Complete estos datos
-                                obligatorios para inicializar su base de datos operativa.</p>
-
+                            <p class="text-muted mb-4 small">Detectamos que su cuenta es nueva. Complete estos datos obligatorios para inicializar su base de datos operativa.</p>
                             <div class="row g-3">
                                 <div class="col-md-12">
-                                    <label class="form-label fw-bold small text-uppercase">Nombre del
-                                        Establecimiento</label>
-                                    <input type="text" name="business_name" class="form-control rounded-0"
-                                        placeholder="Ej: Barbería Gran Clase / Salón Elegant" required>
+                                    <label class="form-label fw-bold small text-uppercase">Nombre del Establecimiento</label>
+                                    <input type="text" name="business_name" class="form-control rounded-0" placeholder="Ej: Barbería Gran Clase / Salón Elegant" required>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-bold small text-uppercase">Teléfono de Contacto</label>
-                                    <input type="tel" name="phone" class="form-control rounded-0"
-                                        placeholder="+56 9 1234 5678" required>
+                                    <input type="tel" name="phone" class="form-control rounded-0" placeholder="+56 9 1234 5678" required>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label fw-bold small text-uppercase">Email Público del
-                                        Negocio</label>
-                                    <input type="email" name="email" class="form-control rounded-0"
-                                        placeholder="contacto@minegocio.com" required>
+                                    <label class="form-label fw-bold small text-uppercase">Email Público del Negocio</label>
+                                    <input type="email" name="email" class="form-control rounded-0" placeholder="contacto@minegocio.com" required>
                                 </div>
                                 <div class="col-md-12">
                                     <label class="form-label fw-bold small text-uppercase">Dirección del Local</label>
-                                    <input type="text" name="address" class="form-control rounded-0"
-                                        placeholder="Av. Las Condes 1234, Oficina 50, Santiago" required>
+                                    <input type="text" name="address" class="form-control rounded-0" placeholder="Av. Las Condes 1234, Oficina 50, Santiago" required>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label fw-bold small text-uppercase">Horario General de
-                                        Apertura</label>
-                                    <input type="time" name="opening_time" class="form-control rounded-0" value="09:00"
-                                        required>
+                                    <label class="form-label fw-bold small text-uppercase">Horario General de Apertura</label>
+                                    <input type="time" name="opening_time" class="form-control rounded-0" value="09:00" required>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label fw-bold small text-uppercase">Horario General de
-                                        Cierre</label>
-                                    <input type="time" name="closing_time" class="form-control rounded-0" value="20:00"
-                                        required>
+                                    <label class="form-label fw-bold small text-uppercase">Horario General de Cierre</label>
+                                    <input type="time" name="closing_time" class="form-control rounded-0" value="20:00" required>
                                 </div>
                             </div>
                         </div>
                         <div class="modal-footer bg-white border-top-0 p-4">
                             <button type="submit" class="btn w-100 text-white fw-bold rounded-0 py-3"
-                                style="background-color: #F58220; letter-spacing: 1px;">GUARDAR CONFIGURACIÓN Y
-                                ENTRAR</button>
+                                style="background-color: #F58220; letter-spacing: 1px;">GUARDAR CONFIGURACIÓN Y ENTRAR</button>
                         </div>
                     </form>
                 </div>
@@ -694,7 +1006,6 @@
             });
         </script>
         {% endif %}
-
 
     </main>
 

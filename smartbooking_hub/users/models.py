@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-
+from django.contrib.auth import get_user_model
 
 class User(AbstractUser):
     # AbstractUser ya incluye first_name, last_name, password (hash), is_active
@@ -39,3 +39,34 @@ class Client(models.Model):
 
     def __str__(self):
         return f"{self.first_name} {self.last_name} - {self.business.name}"
+    
+    
+User = get_user_model()
+    
+class Business(models.Model):
+    # Definición de los niveles del SaaS
+    PLAN_CHOICES = [
+        ('emprendedor', 'Plan Emprendedor (Staff 2)'),
+        ('pro', 'Plan Profesional (Staff 4)'),
+        ('luxury', 'Plan Luxury (Staff 6)'),
+    ]
+
+    owner = models.OneToOneField(User, on_delete=models.CASCADE, related_name='business')
+    name = models.CharField(max_length=150, verbose_name="Nombre del Local")
+    
+    # ========================================================
+    # CONTROL DE SUSCRIPCIÓN SAAS (TRIAL Y PLAN)
+    # ========================================================
+    current_plan = models.CharField(max_length=20, choices=PLAN_CHOICES, default='pro')
+    is_in_trial = models.BooleanField(default=True)
+    trial_start = models.DateTimeField(auto_now_add=True)
+    trial_end = models.DateTimeField(null=True, blank=True)
+    
+    # ========================================================
+    # SEGURIDAD FINANCIERA (TRANSBANK CARD ON FILE)
+    # ========================================================
+    tbk_user = models.CharField(max_length=100, null=True, blank=True, verbose_name="Token Cliente Transbank")
+    card_number = models.CharField(max_length=20, null=True, blank=True, verbose_name="Máscara de Tarjeta")
+
+    def __str__(self):
+        return f"{self.name} - Plan: {self.get_current_plan_display()}"

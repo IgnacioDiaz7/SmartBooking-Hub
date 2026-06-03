@@ -28,6 +28,14 @@ class Business(models.Model):
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    # ========================================================
+    # CONTROL DE SUSCRIPCIÓN SAAS Y TRANSBANK
+    # ========================================================
+    is_in_trial = models.BooleanField(default=True)
+    trial_end = models.DateTimeField(null=True, blank=True)
+    tbk_user = models.CharField(max_length=100, null=True, blank=True, verbose_name="Token Cliente Transbank")
+    card_number = models.CharField(max_length=20, null=True, blank=True, verbose_name="Máscara de Tarjeta")
 
     def __str__(self):
         return self.name
@@ -40,6 +48,7 @@ class UserBusiness(models.Model):
         ('manager', 'Administrador'),
         ('staff', 'Staff')
     ])
+    provides_services = models.BooleanField(default=True, verbose_name="¿Atiende clientes?")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -79,16 +88,29 @@ class BusinessHour(models.Model):
 
     class Meta:
         unique_together = ('business', 'day_of_week')
-        
+    
+            
 class Appointment(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pendiente'),
+        ('completed', 'Completado'),
+        ('cancelled', 'Cancelado / No Asistió')
+    ]
+
     business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='appointments')
-    staff = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='appointments')
+    
+    # ESTA ES LA CONEXIÓN CLAVE (apunta a la app users)
+    client = models.ForeignKey('users.Client', on_delete=models.CASCADE, related_name='appointments', null=True) 
+    
+    staff = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='appointments', null=True, blank=True)
     service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name='appointments')
+    
     date = models.DateTimeField()
-    # Guardamos el precio en el momento de la cita para que no cambie si el precio del servicio cambia después
     price = models.DecimalField(max_digits=10, decimal_places=2) 
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.service.name} - {self.staff.first_name} - {self.date}"
+        nombre_cliente = self.client.first_name if self.client else "Sin Cliente"
+        return f"{self.service.name} - {nombre_cliente} - {self.date}"
