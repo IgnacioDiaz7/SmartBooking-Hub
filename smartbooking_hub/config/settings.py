@@ -6,6 +6,7 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 
+
 # ==============================================================================
 # CARGA DE VARIABLES DE ENTORNO
 # ==============================================================================
@@ -49,6 +50,7 @@ INSTALLED_APPS = [
     'businesses',
     'workers',
     'bookings',
+    'django.contrib.humanize',
 ]
 
 MIDDLEWARE = [
@@ -116,6 +118,8 @@ LANGUAGE_CODE = 'es-cl'
 TIME_ZONE = 'America/Santiago'
 USE_I18N = True
 USE_TZ = True
+USE_THOUSAND_SEPARATOR = True
+FORMAT_MODULE_PATH = 'config.formats'
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']

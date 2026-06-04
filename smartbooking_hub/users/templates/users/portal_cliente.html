@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Portal | SmartBooking HUB</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .bg-navy { background-color: #0A2647; }
+        .text-navy { color: #0A2647; }
+        .btn-naranjo { background-color: #F58220; color: white; border: none; }
+        .btn-naranjo:hover { background-color: #e07015; color: white; }
+        .btn-outline-naranjo { color: #F58220; border-color: #F58220; }
+        .btn-outline-naranjo:hover { background-color: #F58220; color: white; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-dark bg-navy shadow-sm py-3">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#">
+                <i class="bi bi-person-circle me-2 text-white-50"></i> Mi Portal
+            </a>
+            <div class="d-flex">
+                <a href="/logout/" class="btn btn-sm btn-outline-light rounded-0 border-0">Cerrar Sesión</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h3 class="fw-bold text-navy">Hola, {{ request.user.first_name }}</h3>
+                <p class="text-muted">Gestiona tus próximas horas y revisa tu historial de servicios.</p>
+            </div>
+        </div>
+        <div class="row mb-5">
+            <div class="col-12">
+                <h5 class="fw-bold text-navy mb-3"><i class="bi bi-shop-window me-2"></i>Reserva nuevamente en tus lugares frecuentes</h5>
+                
+                <div class="d-flex gap-3 overflow-auto pb-3" style="scrollbar-width: thin;">
+                    {% for negocio in negocios_frecuentes %}
+                    <div class="card border-0 shadow-sm rounded-0 flex-shrink-0" style="width: 280px; border-top: 4px solid #0A2647 !important;">
+                        <div class="card-body p-4">
+                            <h6 class="fw-bold text-navy text-truncate mb-1">{{ negocio.name }}</h6>
+                            <p class="small text-muted text-truncate mb-3"><i class="bi bi-geo-alt me-1"></i>{{ negocio.address }}</p>
+                            
+                            <a href="{% url 'public_booking' negocio.slug %}" class="btn btn-sm btn-outline-naranjo w-100 rounded-0 fw-bold">
+                                <i class="bi bi-calendar-plus me-1"></i> Agendar Nueva Cita
+                            </a>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="alert alert-light border border-dashed w-100 text-center py-4 rounded-0 text-muted small mb-0">
+                        Aún no tienes lugares visitados. Una vez que agendes tu primera cita, tus lugares favoritos aparecerán aquí para un acceso rápido.
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <h5 class="fw-bold text-navy mb-3"><i class="bi bi-calendar-event me-2"></i>Mis Próximas Citas</h5>
+                
+                {% for cita in citas_futuras %}
+                <div class="card border-0 shadow-sm rounded-0 mb-3" style="border-left: 4px solid #F58220 !important;">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                            <div>
+                                <h5 class="fw-bold text-navy mb-1">{{ cita.service.name }}</h5>
+                                <p class="text-muted small mb-2"><i class="bi bi-shop me-1"></i> {{ cita.business.name }}</p>
+                                <div class="d-flex gap-3 text-muted small">
+                                    <span><i class="bi bi-calendar3 me-1"></i> {{ cita.date|date:"l d \d\e F, Y" }}</span>
+                                    <span class="text-navy fw-bold"><i class="bi bi-clock me-1"></i> {{ cita.date|date:"H:i" }} hrs</span>
+                                </div>
+                            </div>
+                            
+                            <div class="text-end">
+                                <span class="badge bg-success-subtle text-success border border-success-subtle mb-2 px-3 py-2 rounded-0">Confirmada</span>
+                                <br>
+                                <form method="POST" action="">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="cancel_appointment">
+                                    <input type="hidden" name="cita_id" value="{{ cita.id }}">
+                                    
+                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-0 border-0 text-decoration-underline" onclick="return confirm('¿Confirmas que deseas cancelar esta cita para {{ cita.service.name }}? Esta acción no se puede deshacer.');">
+                                        Cancelar cita
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="alert alert-light border border-dashed text-center py-5 rounded-0 text-muted">
+                    <i class="bi bi-calendar-x fs-2 d-block mb-2 text-black-50"></i>
+                    No tienes próximas citas agendadas.<br>
+                    ¡Es un buen momento para reservar!
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="col-lg-4">
+                <h5 class="fw-bold text-navy mb-3"><i class="bi bi-clock-history me-2"></i>Historial</h5>
+                
+                <div class="card border-0 shadow-sm rounded-0">
+                    <div class="card-body p-0">
+                        <ul class="list-group list-group-flush">
+                            {% for cita in citas_pasadas %}
+                            <li class="list-group-item p-3 border-bottom border-light">
+                                <div class="d-flex w-100 justify-content-between mb-1">
+                                    <h6 class="mb-0 fw-bold" style="font-size: 0.9rem;">{{ cita.service.name }}</h6>
+                                    <small class="text-muted">{{ cita.date|date:"d M y" }}</small>
+                                </div>
+                                <small class="text-muted">{{ cita.business.name }}</small>
+                                <div class="mt-1">
+                                    {% if cita.status == 'completed' %}
+                                        <span class="badge bg-light text-success border border-success-subtle rounded-0" style="font-size: 0.7rem;">Completado</span>
+                                    {% elif cita.status == 'cancelled' %}
+                                        <span class="badge bg-light text-danger border border-danger-subtle rounded-0" style="font-size: 0.7rem;">Cancelado</span>
+                                    {% else %}
+                                        <span class="badge bg-light text-secondary border rounded-0" style="font-size: 0.7rem;">{{ cita.get_status_display }}</span>
+                                    {% endif %}
+                                </div>
+                            </li>
+                            {% empty %}
+                            <li class="list-group-item p-4 text-center text-muted small border-0">
+                                Aún no tienes un historial de servicios con nosotros.
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

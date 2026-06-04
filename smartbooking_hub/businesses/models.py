@@ -50,6 +50,7 @@ class UserBusiness(models.Model):
     ])
     provides_services = models.BooleanField(default=True, verbose_name="¿Atiende clientes?")
     created_at = models.DateTimeField(auto_now_add=True)
+    commission_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=50.00, verbose_name="Porcentaje de Comisión (%)")
 
     class Meta:
         unique_together = ('user', 'business') # Un usuario solo puede tener un rol por negocio

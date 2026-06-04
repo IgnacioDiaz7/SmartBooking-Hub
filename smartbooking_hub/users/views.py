@@ -41,10 +41,14 @@ from businesses.models import Business, UserBusiness, BusinessHour, Service, App
 #Reservas
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 
 from django.utils.dateparse import parse_datetime
 from django.utils.timezone import make_aware
+
+from django.contrib.auth.models import User
+
+from django.utils import timezone
 
 
 
@@ -67,20 +71,48 @@ def pantalla_test(request):
 # ==========================================
 def verificar_correo(request, uidb64, token):
     try:
-        uid = force_str(urlsafe_base64_decode(uidb64))
+        # Decodificamos el ID del usuario que viene en la URL
+        uid = urlsafe_base64_decode(uidb64).decode()
         user = User.objects.get(pk=uid)
     except (TypeError, ValueError, OverflowError, User.DoesNotExist):
         user = None
 
+    # Verificamos que el usuario exista y que el token del correo sea válido
     if user is not None and default_token_generator.check_token(user, token):
-        user.is_active = True
-        user.save()
-        messages.success(request, "¡Cuenta verificada y activada con éxito! Bienvenido a su panel.")
-        login(request, user)
-        return redirect('dashboard')
+        
+        # Si el usuario envía el formulario con su nueva clave
+        if request.method == 'POST':
+            nueva_clave = request.POST.get('new_password')
+            confirmar_clave = request.POST.get('confirm_password')
+
+            if nueva_clave and nueva_clave == confirmar_clave:
+                # 1. Encriptamos y guardamos la nueva contraseña
+                user.set_password(nueva_clave)
+                
+                # 2. Activamos la cuenta para que pueda operar
+                user.is_active = True
+                user.save()
+                
+                # 3. Iniciamos sesión automáticamente (Magia UX)
+                login(request, user)
+                
+                messages.success(request, "¡Tu cuenta ha sido activada y tu contraseña configurada exitosamente!")
+                
+                # --- GUARDIA DE TRÁFICO INTELIGENTE ---
+                if UserBusiness.objects.filter(user=user).exists():
+                    return redirect('/dashboard/') # Dueños y Staff
+                else:
+                    return redirect('/mi-portal/') # Clientes
+                
+            else:
+                messages.error(request, "Las contraseñas no coinciden. Inténtalo de nuevo.")
+        
+        # Si recién hizo clic en el correo (GET), le mostramos la pantalla para crear la clave
+        return render(request, 'users/set_password.html', {'validlink': True, 'email_colab': user.email})
+        
     else:
-        messages.error(request, "El enlace de verificación es inválido o ya ha expirado.")
-        return redirect('home')
+        # Si hace clic en un enlace viejo o ya usado
+        return render(request, 'users/set_password.html', {'validlink': False})
 
 def login_user(request):
     if request.method == 'POST':
@@ -104,7 +136,15 @@ def login_user(request):
         if user is not None:
             login(request, user)
             messages.success(request, f"¡Bienvenido de nuevo, {user.first_name}!")
-            return redirect('dashboard')
+            
+            # --- GUARDIA DE TRÁFICO INTELIGENTE ---
+            # Si el usuario tiene un negocio asignado (Dueño/Staff) va al dashboard
+            if UserBusiness.objects.filter(user=user).exists():
+                return redirect('dashboard')
+            # Si no tiene negocio, es un cliente y va a su portal
+            else:
+                return redirect('portal_cliente')
+            
         else:
             messages.error(request, "Credenciales incorrectas. Verifique su correo o contraseña.")
             return redirect('home')
@@ -126,7 +166,18 @@ def dashboard(request):
     has_business = user_business_rel is not None
     business_data = user_business_rel.business if has_business else None
     rol_usuario = user_business_rel.business_role if has_business else None
-    seccion_activa = request.GET.get('section', 'resumen')
+    seccion_activa = request.GET.get('section')
+    
+    # 1. Definimos la pantalla de inicio según el rol
+    if not seccion_activa:
+        if rol_usuario == 'staff':
+            seccion_activa = 'calendario' # El staff entra directo a su agenda
+        else:
+            seccion_activa = 'resumen'    # Dueños entran al resumen financiero
+
+    # 2. BLINDAJE RBAC DE URL: Si un staff intenta forzar la URL hacia áreas restringidas, lo devolvemos a su agenda
+    if rol_usuario == 'staff' and seccion_activa in ['resumen', 'reportes', 'colaboradores', 'servicios', 'config']:
+        seccion_activa = 'calendario'
 
     # ========================================================
     # MANEJO DE FORMULARIOS (POST)
@@ -239,6 +290,12 @@ def dashboard(request):
 
         # [LÓGICA 3]: AGREGAR COLABORADOR
         elif action == 'add_colaborador' and has_business:
+            
+            # BLINDAJE RBAC: Evitamos que un Staff acceda a esta acción por URL/POST malicioso
+            if rol_usuario not in ['owner', 'manager']:
+                messages.error(request, "No tienes permisos para invitar colaboradores.")
+                return redirect('/dashboard/?section=colaboradores')
+
             colaboradores_actuales = UserBusiness.objects.filter(business=business_data).exclude(business_role='owner').count()
             tiempo_operando = timezone.now() - business_data.created_at if hasattr(business_data, 'created_at') else timedelta(days=0)
             en_periodo_prueba = tiempo_operando.days <= 60
@@ -254,6 +311,7 @@ def dashboard(request):
             if User.objects.filter(username=email).exists():
                 messages.error(request, "El correo ya está registrado.")
                 return redirect('/dashboard/?section=colaboradores')
+            
             try:
                 clave_temporal = str(random.randint(100000, 999999))
                 nuevo_usuario = User.objects.create_user(
@@ -262,29 +320,73 @@ def dashboard(request):
                 )
                 nuevo_usuario.is_active = False
                 nuevo_usuario.save()
+                
+                # Capturamos el interruptor de reservas y la comisión
                 recibe_reservas = request.POST.get('provides_services') == 'on'
-                UserBusiness.objects.create(user=nuevo_usuario, business=business_data, business_role=request.POST.get('role'))
+                comision = request.POST.get('commission_percentage')
+                
+                # Preparamos los datos del perfil de negocio
+                ub_data = {
+                    'user': nuevo_usuario,
+                    'business': business_data,
+                    'business_role': request.POST.get('role'),
+                    'provides_services': recibe_reservas,
+                }
+                
+                # Asignamos la comisión si fue enviada en el formulario
+                if comision:
+                    ub_data['commission_percentage'] = comision
+                    
+                # Creamos el registro con todos los datos
+                UserBusiness.objects.create(**ub_data)
+                
                 uid = urlsafe_base64_encode(force_bytes(nuevo_usuario.pk))
                 token = default_token_generator.make_token(nuevo_usuario)
                 enlace_seguro = request.build_absolute_uri(reverse('verificar_correo', kwargs={'uidb64': uid, 'token': token}))
-                mensaje_html = f"<p>Su clave temporal es: {clave_temporal}. <a href='{enlace_seguro}'>Activar Cuenta</a></p>"
+                
+                mensaje_html = f"""
+                <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+                    <h2 style="color: #0A2647;">¡Has sido invitado a SmartBooking HUB!</h2>
+                    <p>El administrador de tu local te ha invitado a unirte a la plataforma operativa.</p>
+                    <p>Para activar tu cuenta y configurar tu contraseña de acceso, haz clic en el siguiente botón:</p>
+                    <a href="{enlace_seguro}" style="display: inline-block; background-color: #F58220; color: white; padding: 12px 25px; text-decoration: none; font-weight: bold; margin-top: 15px; border-radius: 4px;">Activar mi Cuenta</a>
+                    <p style="font-size: 12px; color: #888; margin-top: 30px;">Si el botón no funciona, copia y pega este enlace en tu navegador:<br>{enlace_seguro}</p>
+                </div>
+                """
                 send_mail('Invitación al equipo', strip_tags(mensaje_html), settings.DEFAULT_FROM_EMAIL, [email], html_message=mensaje_html)
                 messages.success(request, "Invitación enviada exitosamente.")
+                
             except Exception as e:
-                messages.error(request, f"Error: {e}")
+                messages.error(request, f"Error al agregar colaborador: {e}")
+                
             return redirect('/dashboard/?section=colaboradores')
 
         # [LÓGICA 4]: EDITAR COLABORADOR
         elif action == 'edit_colaborador' and has_business:
             try:
                 ub_target = UserBusiness.objects.get(id=request.POST.get('ub_id'), business=business_data)
-                ub_target.business_role = request.POST.get('role')
+                
+                # BLINDAJE RBAC: Solo dueño o administrador pueden alterar roles, comisiones y accesos al sistema
+                if rol_usuario in ['owner', 'manager']:
+                    ub_target.business_role = request.POST.get('role')
+                    
+                    # Capturamos y guardamos la nueva comisión
+                    nueva_comision = request.POST.get('commission_percentage')
+                    if nueva_comision:
+                        ub_target.commission_percentage = nueva_comision
+                    
+                    # Activar o desactivar el acceso completo al sistema
+                    ub_target.user.is_active = request.POST.get('is_active') == 'on'
+                
+                # El estado de recibir reservas en la agenda pública
                 ub_target.provides_services = request.POST.get('provides_services') == 'on'
                 ub_target.save()
+                
+                # Actualización de datos personales
                 ub_target.user.first_name = request.POST.get('first_name')
                 ub_target.user.last_name = request.POST.get('last_name')
-                ub_target.user.is_active = request.POST.get('is_active') == 'on'
                 ub_target.user.save()
+                
                 messages.success(request, "Cambios guardados.")
             except Exception as e:
                 messages.error(request, f"Error: {e}")
@@ -359,12 +461,17 @@ def dashboard(request):
             cita_id = request.POST.get('cita_id')
             nuevo_estado = request.POST.get('status')
             try:
-                cita = Appointment.objects.get(id=cita_id, business=business_data)
+                # BLINDAJE RBAC: Si es staff, solo puede editar sus propias citas
+                if rol_usuario == 'staff':
+                    cita = Appointment.objects.get(id=cita_id, business=business_data, staff=request.user)
+                else:
+                    cita = Appointment.objects.get(id=cita_id, business=business_data)
+                    
                 cita.status = nuevo_estado
                 cita.save()
                 messages.success(request, f"Estado de la cita actualizado a '{cita.get_status_display()}'.")
             except Exception as e:
-                messages.error(request, f"Error al actualizar la cita: {e}")
+                messages.error(request, "Error al actualizar la cita. Verifique que tenga permisos.")
             return redirect('/dashboard/?section=calendario')
         
         # [LÓGICA 10]: ACTIVAR/DESACTIVAR SERVICIOS DEL COLABORADOR
@@ -441,10 +548,101 @@ def dashboard(request):
     #CALENDARIO DE STAFF
     hoy = timezone.now().date()
     
-    citas_calendario = Appointment.objects.filter(
-        business=business_data, 
-        date__date__gte=hoy
-    ).select_related('client', 'service', 'staff').order_by('date') if has_business else []
+    if has_business:
+        if rol_usuario == 'staff':
+            # El staff solo ve su propia agenda
+            citas_calendario = Appointment.objects.filter(
+                business=business_data, 
+                staff=request.user,
+                date__date__gte=hoy
+            ).select_related('client', 'service', 'staff').order_by('date')
+        else:
+            # Owner y Manager ven todo el local
+            citas_calendario = Appointment.objects.filter(
+                business=business_data, 
+                date__date__gte=hoy
+            ).select_related('client', 'service', 'staff').order_by('date')
+    else:
+        citas_calendario = []
+        
+    # ========================================================
+    # MOTOR DE REPORTES BI Y FINANZAS (Mes Actual)
+    # ========================================================
+    ingresos_totales = 0
+    comisiones_totales = 0
+    ganancia_neta = 0
+    staff_financiero = []
+
+    if has_business:
+        # 1. Filtramos desde el día 1 del mes actual
+        hoy = timezone.now()
+        inicio_mes = hoy.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        
+        # Solo calculamos el dinero de las citas que realmente se "Completaron"
+        citas_completadas_mes = Appointment.objects.filter(
+            business=business_data,
+            status='completed',
+            date__gte=inicio_mes
+        )
+        
+        # Ingreso Bruto Total
+        ingresos_totales = sum(cita.price for cita in citas_completadas_mes)
+        
+        # 2. Desglose por Colaborador
+        colaboradores_servicio = UserBusiness.objects.filter(
+            business=business_data, provides_services=True
+        ).select_related('user')
+        
+        for colab in colaboradores_servicio:
+            # Filtramos las citas y las ordenamos de la más reciente a la más antigua
+            citas_colab = citas_completadas_mes.filter(staff=colab.user).order_by('-date')
+            ingresos_colab = sum(c.price for c in citas_colab)
+            
+            # Calculamos su comisión
+            comision_colab = (ingresos_colab * colab.commission_percentage) / 100
+            comisiones_totales += comision_colab
+            
+            staff_financiero.append({
+                'id_colab': colab.id, # ID para controlar el menú desplegable
+                'nombre': f"{colab.user.first_name} {colab.user.last_name}",
+                'citas_atendidas': citas_colab.count(),
+                'ingresos_generados': ingresos_colab,
+                'porcentaje': colab.commission_percentage,
+                'comision_a_pagar': comision_colab,
+                'lista_citas': citas_colab # Pasamos el detalle de las citas al HTML
+            })
+            
+        # 3. Lo que le queda al bolsillo del Dueño/Local
+        ganancia_neta = ingresos_totales - comisiones_totales
+        
+        # ========================================================
+        # NUEVAS MÉTRICAS EN TIEMPO REAL (RESUMEN)
+        # ========================================================
+        # 1. Clientes Totales (Únicos registrados en el local)
+        clientes_totales = Client.objects.filter(business=business_data).count()
+        
+        # 2. Alertas de Inasistencia (Citas canceladas del mes actual)
+        alertas_inasistencia = Appointment.objects.filter(
+            business=business_data, 
+            date__gte=inicio_mes, 
+            status='cancelled'
+        ).count()
+        
+        # 3. Objetivo Comercial Inteligente (Sueldo Mínimo en Chile: $500.000)
+        # Meta: Que las comisiones generadas alcancen para pagar 1 sueldo mínimo a cada especialista
+        sueldo_minimo = 500000
+        especialistas_count = colaboradores_servicio.count()
+        
+        if especialistas_count > 0:
+            meta_comisiones = especialistas_count * sueldo_minimo
+            progreso_meta = (comisiones_totales / meta_comisiones) * 100
+            # Topamos la barra en 100% para que no se desborde visualmente si superan la meta
+            if progreso_meta > 100:
+                progreso_meta = 100
+        else:
+            progreso_meta = 0
+    
+    
     # Empaquetamos todo para enviarlo al HTML
     context = {
         'necesita_onboarding': not has_business,
@@ -467,16 +665,21 @@ def dashboard(request):
         #Reservas
         'citas_recientes': citas_recientes,
         'citas_calendario': citas_calendario,
+        
+        #VARIABLES FINANCIERAS
+        'ingresos_totales': ingresos_totales,
+        'comisiones_totales': comisiones_totales,
+        'ganancia_neta': ganancia_neta,
+        'staff_financiero': staff_financiero,
+        'clientes_totales': clientes_totales,
+        'alertas_inasistencia': alertas_inasistencia,
+        'progreso_meta': progreso_meta,
+        'especialistas_count': especialistas_count,
+        
     }
     
-    # Enrutamiento dinámico según el Rol
-    if rol_usuario == 'staff':
-        citas_staff = Appointment.objects.filter(staff=request.user).order_by('-date')
-        context['total_ganado'] = citas_staff.aggregate(Sum('price'))['price__sum'] or 0
-        return render(request, 'businesses/dashboard_staff.html', context)
-    else:
-        return render(request, 'businesses/dashboard_owner.html', context)
-
+    # Enrutamiento unificado (La plantilla ahora es inteligente y se adapta al rol)
+    return render(request, 'businesses/dashboard_owner.html', context)
 # ========================================================
 # API DE REGISTRO UNIFICADO CON TRANSBANK WEBPAY
 # ========================================================
@@ -630,6 +833,55 @@ def public_booking(request, business_slug):
     # Renderizamos una nueva plantilla diseñada exclusivamente para el cliente final
     return render(request, 'businesses/public_booking.html', context)
 
+
+# ========================================================
+# ACCESO Y REGISTRO DE CLIENTES (PORTAL)
+# ========================================================
+def acceso_cliente(request):
+    # Si el usuario ya está logueado, lo enviamos directo a su portal
+    if request.user.is_authenticated:
+        return redirect('portal_cliente')
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+
+        # [ACCIÓN 1]: INICIAR SESIÓN
+        if action == 'login':
+            # Django usa 'username' por defecto para autenticar, y nosotros guardamos el email ahí
+            user = authenticate(request, username=email, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect('portal_cliente')
+            else:
+                messages.error(request, "Correo o contraseña incorrectos.")
+
+        # [ACCIÓN 2]: CREAR CUENTA NUEVA
+        elif action == 'register':
+            first_name = request.POST.get('first_name')
+            last_name = request.POST.get('last_name')
+            
+            if User.objects.filter(username=email).exists():
+                messages.error(request, "Este correo ya está registrado. Por favor, inicia sesión.")
+            else:
+                try:
+                    # Creamos el usuario
+                    nuevo_usuario = User.objects.create_user(
+                        username=email, 
+                        email=email, 
+                        password=password, 
+                        first_name=first_name, 
+                        last_name=last_name
+                    )
+                    # Lo logueamos automáticamente tras registrarse
+                    login(request, nuevo_usuario)
+                    messages.success(request, "¡Tu cuenta ha sido creada exitosamente!")
+                    return redirect('portal_cliente')
+                except Exception as e:
+                    messages.error(request, f"Ocurrió un error al crear la cuenta: {e}")
+
+    return render(request, 'users/acceso_cliente.html')
 # ========================================================
 # API DE DISPONIBILIDAD MATEMÁTICA
 # ========================================================
@@ -998,3 +1250,99 @@ def webpay_return(request, business_slug):
         messages.error(request, f"Ocurrió un error al procesar el pago: {e}")
 
     return redirect('public_booking', business_slug=business_slug)
+
+# ========================================================
+# PORTAL DEL CLIENTE (Fidelización y Autogestión)
+# ========================================================
+@login_required(login_url='/login/')
+def portal_cliente(request):
+    from django.utils import timezone
+    hoy = timezone.now()
+    
+    # --- LÓGICA DE CANCELACIÓN AUTÓNOMA ---
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        
+        if action == 'cancel_appointment':
+            cita_id = request.POST.get('cita_id')
+            try:
+                # BLINDAJE DE SEGURIDAD: Buscamos la cita asegurándonos de que 
+                # pertenezca estrictamente al correo del cliente logueado
+                cita = Appointment.objects.get(id=cita_id, client__email=request.user.email)
+                
+                # Actualizamos el estado para liberar el calendario
+                cita.status = 'cancelled'
+                cita.save()
+                
+                messages.success(request, f"Tu cita para '{cita.service.name}' ha sido cancelada. El horario vuelve a estar disponible.")
+            except Appointment.DoesNotExist:
+                messages.error(request, "Error de seguridad: No tienes permisos para cancelar esta cita o no existe.")
+            except Exception as e:
+                messages.error(request, f"Ocurrió un error: {e}")
+                
+            # Recargamos la página para que la cita pase a la columna de historial
+            return redirect('portal_cliente')
+    # --------------------------------------
+    
+    # Buscamos las citas vinculadas al email del usuario activo
+    citas_futuras = Appointment.objects.filter(
+        client__email=request.user.email, 
+        date__gte=hoy
+    ).exclude(status='cancelled').select_related('service', 'business').order_by('date')
+    
+    # En el historial pasamos todo (incluyendo las futuras que hayan sido canceladas)
+    citas_pasadas = Appointment.objects.filter(
+        client__email=request.user.email
+    ).exclude(
+        id__in=citas_futuras.values_list('id', flat=True)
+    ).select_related('service', 'business').order_by('-date')
+    
+    negocios_frecuentes = Business.objects.filter(
+        appointments__client__email=request.user.email
+    ).distinct()[:5]
+
+    context = {
+        'citas_futuras': citas_futuras,
+        'citas_pasadas': citas_pasadas,
+        'negocios_frecuentes': negocios_frecuentes,
+    }
+    
+    return render(request, 'users/portal_cliente.html', context)
+# ========================================================
+# RECUPERACIÓN DE CONTRASEÑA
+# ========================================================
+def recuperar_password(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        try:
+            usuario = User.objects.get(email=email)
+            
+            # Generamos el token de seguridad único
+            uid = urlsafe_base64_encode(force_bytes(usuario.pk))
+            token = default_token_generator.make_token(usuario)
+            enlace_seguro = request.build_absolute_uri(reverse('verificar_correo', kwargs={'uidb64': uid, 'token': token}))
+            
+            # Diseño del correo de recuperación
+            logo_url = request.build_absolute_uri('/static/img/logo.png')
+            mensaje_html = f"""
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; text-align: center;">
+                <img src="{logo_url}" alt="SmartBooking HUB" style="max-width: 150px; margin-bottom: 20px;">
+                <h2 style="color: #0A2647;">Recuperación de Contraseña</h2>
+                <p>Hemos recibido una solicitud para restablecer el acceso a tu cuenta.</p>
+                <p>Haz clic en el siguiente botón para crear una contraseña nueva:</p>
+                <div style="margin: 30px 0;">
+                    <a href="{enlace_seguro}" style="background-color: #F58220; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">Restablecer mi Contraseña</a>
+                </div>
+                <p style="font-size: 12px; color: #888;">Si no solicitaste esto, puedes ignorar este correo de forma segura.</p>
+            </div>
+            """
+            send_mail('Recupera tu contraseña - SmartBooking HUB', strip_tags(mensaje_html), settings.DEFAULT_FROM_EMAIL, [email], html_message=mensaje_html)
+            
+        except User.DoesNotExist:
+            # Por seguridad, no le decimos al usuario malicioso si el correo existe o no
+            pass 
+        
+        messages.success(request, "Si el correo está registrado en nuestro sistema, te enviaremos un enlace para recuperar tu contraseña.")
+        return redirect('home')
+        
+    return redirect('home')

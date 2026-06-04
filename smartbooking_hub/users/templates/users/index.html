@@ -274,8 +274,25 @@
                                     <input type="password" name="password" class="form-control" placeholder="••••••••"
                                         required>
                                 </div>
+                                <div class="text-end mb-4">
+                                    <a href="#" class="small text-muted text-decoration-underline" data-bs-toggle="collapse" data-bs-target="#recoverPasswordDiv">¿Olvidaste tu contraseña?</a>
+                                </div>
+
                                 <button type="submit" class="btn btn-corp btn-main w-100">Entrar al Sistema</button>
                             </form>
+                            <div class="collapse mt-4" id="recoverPasswordDiv">
+                                <div class="card card-body bg-light border-0 rounded-0">
+                                    <form method="POST" action="{% url 'recuperar_password' %}">
+                                        {% csrf_token %}
+                                        <label class="form-label small fw-bold text-navy"><i class="bi bi-shield-lock me-2"></i>Recuperar Acceso</label>
+                                        <p class="small text-muted mb-2">Ingresa tu correo y te enviaremos un enlace seguro.</p>
+                                        <div class="input-group">
+                                            <input type="email" name="email" class="form-control rounded-0 border-secondary" placeholder="tu@correo.com" required>
+                                            <button type="submit" class="btn btn-dark rounded-0">Enviar Enlace</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="tab-pane fade" id="pills-register" role="tabpanel">

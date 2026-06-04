@@ -1,5 +1,6 @@
 from django.urls import path
-from .views import home_view, verificar_correo, dashboard, login_user, logout_user, pantalla_test, RegistroUsuarioAPI, transbank_confirm, public_booking, get_available_slots, confirm_booking, webpay_return
+from .views import home_view, verificar_correo, dashboard, login_user, logout_user, pantalla_test, RegistroUsuarioAPI, transbank_confirm, public_booking, get_available_slots, confirm_booking, webpay_return, portal_cliente
+from .views import acceso_cliente, recuperar_password
 
 urlpatterns = [
     # Rutas originales
@@ -15,5 +16,8 @@ urlpatterns = [
     path('api/disponibilidad/<slug:business_slug>/', get_available_slots, name='api_disponibilidad'),
     path('reservar/<slug:business_slug>/confirmar/', confirm_booking, name='confirm_booking'),
     path('reservar/<slug:business_slug>/webpay-return/', webpay_return, name='webpay_return'),
+    path('mi-portal/', portal_cliente, name='portal_cliente'),
+    path('acceso/', acceso_cliente, name='acceso_cliente'),
+    path('recuperar-password/', recuperar_password, name='recuperar_password'),
     
 ]

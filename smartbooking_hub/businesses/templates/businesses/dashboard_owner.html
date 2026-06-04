@@ -38,6 +38,7 @@
             border-left: 3px solid #F58220;
             padding-left: 10px;
         }
+        
     </style>
 </head>
 
@@ -50,19 +51,31 @@
                     style="filter: brightness(0) invert(1); max-width: 80%;">
             </a>
         </div>
+        {% load humanize %}
 
         <nav class="nav flex-column gap-3 px-4 mt-4">
+            
+            {% if rol_usuario == 'owner' or rol_usuario == 'manager' %}
             <a class="nav-link text-white-50 small {% if seccion_activa == 'resumen' %}active-tab{% endif %}"
                 href="?section=resumen">RESUMEN</a>
+            {% endif %}
+
             <a class="nav-link text-white-50 small {% if seccion_activa == 'calendario' %}active-tab{% endif %}"
-                href="?section=calendario">CALENDARIO</a>
+                href="?section=calendario">
+                {% if rol_usuario == 'staff' %}MI AGENDA{% else %}CALENDARIO{% endif %}
+            </a>
+
+            {% if rol_usuario == 'owner' or rol_usuario == 'manager' %}
             <a class="nav-link text-white-50 small {% if seccion_activa == 'colaboradores' %}active-tab{% endif %}"
                 href="?section=colaboradores">COLABORADORES</a>
-            <a class="nav-link text-white-50 small {% if seccion_activa == 'servicios' %}active-tab{% endif %}" href="?section=servicios">SERVICIOS</a>
+            <a class="nav-link text-white-50 small {% if seccion_activa == 'servicios' %}active-tab{% endif %}" 
+                href="?section=servicios">SERVICIOS</a>
             <a class="nav-link text-white-50 small {% if seccion_activa == 'reportes' %}active-tab{% endif %}"
                 href="?section=reportes">REPORTES BI</a>
             <a class="nav-link text-white-50 small mt-4 border-top pt-4 border-secondary {% if seccion_activa == 'config' %}active-tab{% endif %}"
                 href="?section=config">⚙️ CONFIGURACIÓN</a>
+            {% endif %}
+            
         </nav>
 
         <div class="mt-auto p-4">
@@ -85,7 +98,7 @@
         <!-- ========================================== -->
         <!-- VISTA 1: RESUMEN (SAAS) -->
         <!-- ========================================== -->
-        {% if seccion_activa == 'resumen' %}
+        {% if seccion_activa == 'resumen' and rol_usuario != 'staff' %}
         <header class="d-flex justify-content-between align-items-center mb-4">
             <div>
                 <h2 class="fw-bold mb-0" style="color: #0A2647;">{% if business %}{{ business.name }}{% else %}Panel de Gestión{% endif %}</h2>
@@ -140,8 +153,8 @@
 
                         <div class="progress mb-3 rounded-0" style="height: 10px; background-color: #e9ecef;">
                             <div class="progress-bar" role="progressbar"
-                                style="width: {{ staff_percentage|floatformat:0 }}%; background-color: #F58220;"
-                                aria-valuenow="{{ staff_percentage|floatformat:0 }}" aria-valuemin="0"
+                                style="width: {{ staff_percentage|floatformat:0|intcomma }}%; background-color: #F58220;"
+                                aria-valuenow="{{ staff_percentage|floatformat:0|intcomma }}" aria-valuemin="0"
                                 aria-valuemax="100"></div>
                         </div>
 
@@ -163,22 +176,16 @@
                             <span class="badge bg-warning text-dark rounded-0 fw-bold">MÓDULO PRO</span>
                         </div>
 
-                        <div class="row text-center mb-4 g-3">
-                            <div class="col-6">
-                                <div class="p-3 border border-secondary rounded-0"
-                                    style="background-color: rgba(255,255,255,0.05);">
-                                    <span class="d-block small text-white-50 text-uppercase fw-bold mb-1">Procesado en Caja</span>
-                                    <h3 class="fw-bold mb-0">${{ comisiones.total_procesado_mes|default:"0" }}</h3>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="p-3 border border-secondary rounded-0"
-                                    style="background-color: rgba(255,255,255,0.05);">
-                                    <span class="d-block small text-white-50 text-uppercase fw-bold mb-1">Pago a Especialistas</span>
-                                    <h3 class="fw-bold mb-0" style="color: #F58220;">${{ comisiones.comisiones_estilistas|default:"0" }}</h3>
-                                </div>
-                            </div>
+                        <div class="row text-center mt-4">
+                        <div class="col-md-6 border-end border-secondary border-opacity-25">
+                            <p class="text-white-50 small fw-bold mb-1">PROCESADO EN CAJA</p>
+                            <h3 class="text-white fw-bold mb-0">${{ ingresos_totales|floatformat:0|intcomma }}</h3>
                         </div>
+                        <div class="col-md-6">
+                            <p class="text-white-50 small fw-bold mb-1">PAGO A ESPECIALISTAS</p>
+                            <h3 class="fw-bold mb-0" style="color: #F58220;">${{ comisiones_totales|floatformat:0|intcomma }}</h3>
+                        </div>
+                    </div>
 
                         <div class="d-flex align-items-center p-3 border border-secondary rounded-0"
                             style="background-color: rgba(255,255,255,0.05);">
@@ -192,29 +199,30 @@
             </div>
         </div>
 
+        <!-- TARJETAS DE MÉTRICAS RÁPIDAS -->
         <div class="row g-4 mb-4">
+            <!-- Ingresos -->
             <div class="col-md-4">
-                <div class="card p-4 shadow-sm bg-white h-100 rounded-0 border-0"
-                    style="border-left: 4px solid #0A2647 !important;">
-                    <p class="text-muted small fw-bold mb-1">INGRESOS DEL MES</p>
-                    <h3 class="fw-bold" style="color: #0A2647;">$1.250.000</h3>
-                    <span class="text-success small fw-semibold">↑ 12% vs mes anterior</span>
+                <div class="card border-0 shadow-sm rounded-0 h-100 p-4" style="border-left: 4px solid #0A2647 !important;">
+                    <p class="text-muted small fw-bold text-uppercase mb-1">Ingresos del Mes</p>
+                    <h3 class="fw-bold mb-1" style="color: #0A2647;">${{ ingresos_totales|floatformat:0|intcomma }}</h3>
+                    <p class="text-success small fw-bold mb-0" style="font-size: 0.75rem;">Métrica en tiempo real</p>
                 </div>
             </div>
+            <!-- Clientes Totales -->
             <div class="col-md-4">
-                <div class="card p-4 shadow-sm bg-white h-100 rounded-0 border-0"
-                    style="border-left: 4px solid #F58220 !important;">
-                    <p class="text-muted small fw-bold mb-1">CLIENTES TOTALES</p>
-                    <h3 class="fw-bold" style="color: #0A2647;">148</h3>
-                    <span class="text-muted small">Métrica basada en registros reales</span>
+                <div class="card border-0 shadow-sm rounded-0 h-100 p-4" style="border-left: 4px solid #F58220 !important;">
+                    <p class="text-muted small fw-bold text-uppercase mb-1">Clientes Totales</p>
+                    <h3 class="fw-bold mb-1" style="color: #0A2647;">{{ clientes_totales }}</h3>
+                    <p class="text-muted small mb-0" style="font-size: 0.75rem;">Registrados en su base de datos</p>
                 </div>
             </div>
+            <!-- Inasistencias -->
             <div class="col-md-4">
-                <div class="card p-4 shadow-sm bg-white h-100 rounded-0 border-0"
-                    style="border-left: 4px solid #dc3545 !important;">
-                    <p class="text-muted small fw-bold mb-1 text-danger">ALERTA INASISTENCIAS</p>
-                    <h3 class="fw-bold" style="color: #0A2647;">4</h3>
-                    <span class="text-muted small">Evite pérdidas monetarias este mes</span>
+                <div class="card border-0 shadow-sm rounded-0 h-100 p-4" style="border-left: 4px solid #dc3545 !important;">
+                    <p class="text-muted small fw-bold text-uppercase mb-1">Alerta Inasistencias</p>
+                    <h3 class="fw-bold mb-1" style="color: #0A2647;">{{ alertas_inasistencia }}</h3>
+                    <p class="text-muted small mb-0" style="font-size: 0.75rem;">Citas canceladas este mes</p>
                 </div>
             </div>
         </div>
@@ -286,15 +294,24 @@
                 </div>
             </div>
 
+            <!-- OBJETIVO COMERCIAL -->
             <div class="col-lg-4">
-                <div class="card shadow-sm p-4 h-100 text-white rounded-0 border-0" style="background-color: #0A2647;">
-                    <h5 class="fw-bold mb-4">Objetivo Comercial</h5>
-                    <div class="text-center py-4">
-                        <div class="display-3 fw-bold" style="color: #F58220;">85%</div>
-                        <p class="text-white-50 mt-2">Progreso hacia la meta de ingresos mensual</p>
-                    </div>
-                    <div class="progress rounded-0" style="height: 10px; background-color: rgba(255,255,255,0.1);">
-                        <div class="progress-bar" style="width: 85%; background-color: #F58220;"></div>
+                <div class="card border-0 shadow-sm rounded-0 h-100 p-4" style="background-color: #0A2647;">
+                    <h5 class="fw-bold text-white mb-4">Objetivo Comercial</h5>
+                    
+                    <div class="text-center my-auto">
+                        <h1 class="display-3 fw-bold mb-0" style="color: #F58220;">{{ progreso_meta|floatformat:0|intcomma }}%</h1>
+                        <p class="text-white-50 small mb-4">Progreso hacia la meta mensual</p>
+                        
+                        <div class="progress rounded-0 bg-dark mb-4" style="height: 8px;">
+                            <div class="progress-bar" role="progressbar" style="background-color: #F58220; width: {{ progreso_meta|floatformat:0|intcomma }}%;" aria-valuenow="{{ progreso_meta|floatformat:0|intcomma }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        
+                        <div class="bg-white bg-opacity-10 p-3 text-start">
+                            <p class="text-white-50 small mb-0" style="font-size: 0.75rem; line-height: 1.4;">
+                                <i class="bi bi-info-circle me-1"></i> <strong>Cálculo Inteligente:</strong> La meta se basa en generar suficientes ingresos para que las comisiones paguen, como mínimo, 1 sueldo legal en Chile ($500.000) a tus <strong>{{ especialistas_count }}</strong> especialistas que reciben reservas.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -487,7 +504,7 @@
                             </td>
                             <td>
                                 <span class="d-block">{{ cita.service.name }}</span>
-                                <small class="text-success fw-bold">${{ cita.price|floatformat:0 }}</small>
+                                <small class="text-success fw-bold">${{ cita.price|floatformat:0|intcomma }}</small>
                             </td>
                             <td>
                                 {% if cita.staff %}
@@ -658,6 +675,16 @@
                                                             <option value="manager" {% if colab.business_role == 'manager' %}selected{% endif %}>Administrador (Control Total)</option>
                                                             <option value="owner" {% if colab.business_role == 'owner' %}selected{% endif %}>Dueño (Propiedad Absoluta)</option>
                                                         </select>
+                                                        {% if rol_usuario == 'owner' or rol_usuario == 'manager' %}
+                                                        <div class="mb-3">
+                                                            <label class="form-label small fw-bold text-muted">COMISIÓN POR SERVICIO (%)</label>
+                                                            <div class="input-group">
+                                                                <input type="number" step="0.01" min="0" max="100" name="commission_percentage" class="form-control rounded-0" value="{{ colab.commission_percentage|stringformat:'s' }}" required>
+                                                                <span class="input-group-text rounded-0 bg-light">%</span>
+                                                            </div>
+                                                            <small class="text-muted text-xs">Porcentaje de las ganancias destinado a este colaborador.</small>
+                                                        </div>
+                                                        {% endif %}
                                                         {% if colab.business_role == 'owner' %}
                                                             <input type="hidden" name="role" value="owner">
                                                         {% endif %}
@@ -783,6 +810,16 @@
                                     <option value="manager">Administrador de Local</option>
                                 </select>
                             </div>
+                            {% if rol_usuario == 'owner' or rol_usuario == 'manager' %}
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted">COMISIÓN POR SERVICIO (%)</label>
+                                <div class="input-group">
+                                    <input type="number" step="0.01" min="0" max="100" name="commission_percentage" class="form-control rounded-0" value="{{ colab.commission_percentage|stringformat:'s' }}" required>
+                                    <span class="input-group-text rounded-0 bg-light">%</span>
+                                </div>
+                                    <small class="text-muted text-xs">Porcentaje de las ganancias destinado a este colaborador.</small>
+                            </div>
+                            {% endif %}
                             
                             <div class="mb-2 p-3 border bg-white d-flex justify-content-between align-items-center">
                                 <div>
@@ -842,7 +879,7 @@
                             </td>
                             <td><span class="badge bg-secondary-subtle text-secondary rounded-0">{{ s.category|default:"General" }}</span></td>
                             <td class="text-center"><span class="badge bg-light text-dark border rounded-0">{{ s.duration_minutes }} min</span></td>
-                            <td class="text-success fw-bold text-center">${{ s.price|floatformat:0 }}</td>
+                            <td class="text-success fw-bold text-center">${{ s.price|floatformat:0|intcomma }}</td>
                             <td class="text-end px-4">
                                 <form method="POST" action="{% url 'dashboard' %}" class="d-inline">
                                     {% csrf_token %}
@@ -923,16 +960,132 @@
         {% if seccion_activa == 'reportes' %}
         <header class="mb-5">
             <h2 class="fw-bold mb-0" style="color: #0A2647;">📊 Reportes de Inteligencia (BI)</h2>
-            <p class="text-muted small">Analice el rendimiento, métricas de crecimiento y finanzas</p>
+            <p class="text-muted small">Analice el rendimiento, métricas de crecimiento y finanzas del mes actual.</p>
         </header>
 
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="card border-0 rounded-0 shadow-sm h-100 p-4" style="border-bottom: 4px solid #0A2647 !important;">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small fw-bold mb-1 text-uppercase">Ingresos Brutos (Mes)</p>
+                            <h3 class="fw-bold mb-0" style="color: #0A2647;">${{ ingresos_totales|floatformat:0|intcomma }}</h3>
+                        </div>
+                        <div class="p-2 bg-light rounded text-center">
+                            <i class="bi bi-wallet2 fs-4 text-secondary"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card border-0 rounded-0 shadow-sm h-100 p-4" style="border-bottom: 4px solid #dc3545 !important;">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small fw-bold mb-1 text-uppercase">Comisiones Staff</p>
+                            <h3 class="fw-bold mb-0 text-danger">-${{ comisiones_totales|floatformat:0|intcomma }}</h3>
+                        </div>
+                        <div class="p-2 bg-danger-subtle rounded text-center">
+                            <i class="bi bi-people fs-4 text-danger"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card border-0 rounded-0 shadow-sm h-100 p-4" style="border-bottom: 4px solid #198754 !important;">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small fw-bold mb-1 text-uppercase">Ganancia del Local</p>
+                            <h3 class="fw-bold mb-0 text-success">${{ ganancia_neta|floatformat:0|intcomma }}</h3>
+                        </div>
+                        <div class="p-2 bg-success-subtle rounded text-center">
+                            <i class="bi bi-graph-up-arrow fs-4 text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h5 class="fw-bold mb-3" style="color: #0A2647;">Desempeño y Liquidación de Comisiones</h5>
+        <div class="card shadow-sm bg-white rounded-0 border-0 mb-5">
+            <div class="table-responsive">
+                <table class="table align-middle table-hover mb-0" style="border-collapse: collapse;">
+                    <thead class="bg-light">
+                        <tr class="text-muted small text-uppercase" style="letter-spacing: 1px;">
+                            <th class="py-3 px-4">Especialista</th>
+                            <th class="py-3 text-center">Servicios</th>
+                            <th class="py-3 text-end">Generado al Local</th>
+                            <th class="py-3 text-center">% Acuerdo</th>
+                            <th class="py-3 text-end px-4">A Pagar (Líquido)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for staff in staff_financiero %}
+                        <tr style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#detalleStaff{{ staff.id_colab }}" aria-expanded="false" title="Clic para ver detalle">
+                            <td class="px-4 py-3 fw-bold" style="color: #0A2647;">
+                                <i class="bi bi-chevron-down me-2 small text-muted"></i> {{ staff.nombre }}
+                            </td>
+                            <td class="text-center"><span class="badge bg-secondary rounded-pill">{{ staff.citas_atendidas }}</span></td>
+                            <td class="text-end text-success fw-bold">${{ staff.ingresos_generados|floatformat:0|intcomma }}</td>
+                            <td class="text-center text-muted small">{{ staff.porcentaje|floatformat:0|intcomma }}%</td>
+                            <td class="text-end px-4 fw-bold" style="color: #F58220;">${{ staff.comision_a_pagar|floatformat:0|intcomma }}</td>
+                        </tr>
+                        
+                        <tr>
+                            <td colspan="5" class="p-0 border-0">
+                                <div id="detalleStaff{{ staff.id_colab }}" class="collapse bg-light">
+                                    <div class="p-4 border-start border-4 m-3 bg-white shadow-sm" style="border-color: #F58220 !important;">
+                                        <h6 class="fw-bold mb-3" style="color: #0A2647;">Detalle de Actividades Completadas</h6>
+                                        
+                                        {% if staff.lista_citas %}
+                                        <table class="table table-sm mb-0 align-middle">
+                                            <thead>
+                                                <tr class="text-muted small">
+                                                    <th>Fecha y Hora</th>
+                                                    <th>Cliente</th>
+                                                    <th>Servicio</th>
+                                                    <th class="text-end">Precio Base Cobrado</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for cita in staff.lista_citas %}
+                                                <tr>
+                                                    <td class="small text-muted">{{ cita.date|date:"d M Y - H:i" }}</td>
+                                                    <td class="small fw-bold">{{ cita.client.first_name }} {{ cita.client.last_name }}</td>
+                                                    <td class="small">{{ cita.service.name }}</td>
+                                                    <td class="text-end small">${{ cita.price|floatformat:0|intcomma }}</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                        {% else %}
+                                        <p class="small text-muted mb-0"><i class="bi bi-info-circle me-1"></i> No hay servicios completados registrados este mes.</p>
+                                        {% endif %}
+
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                No hay datos financieros registrados este mes.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <h5 class="fw-bold mb-3 mt-5" style="color: #0A2647;">Proyecciones y Tendencias</h5>
         <div class="row g-4">
             <div class="col-md-6">
                 <div class="card shadow-sm p-4 bg-white rounded-0 border-0 h-100"
                     style="border-left: 4px solid #F58220 !important;">
                     <h6 class="fw-bold text-muted text-uppercase small mb-4">Servicios Más Solicitados</h6>
-                    <div
-                        class="d-flex align-items-center justify-content-center h-75 bg-light border border-dashed text-muted small">
+                    <div class="d-flex align-items-center justify-content-center h-75 bg-light border border-dashed text-muted small" style="min-height: 200px;">
                         [ Gráfico de Torta en Construcción ]
                     </div>
                 </div>
@@ -941,8 +1094,7 @@
                 <div class="card shadow-sm p-4 bg-white rounded-0 border-0 h-100"
                     style="border-left: 4px solid #0A2647 !important;">
                     <h6 class="fw-bold text-muted text-uppercase small mb-4">Ingresos Últimos 6 Meses</h6>
-                    <div
-                        class="d-flex align-items-center justify-content-center h-75 bg-light border border-dashed text-muted small">
+                    <div class="d-flex align-items-center justify-content-center h-75 bg-light border border-dashed text-muted small" style="min-height: 200px;">
                         [ Gráfico de Barras en Construcción ]
                     </div>
                 </div>
