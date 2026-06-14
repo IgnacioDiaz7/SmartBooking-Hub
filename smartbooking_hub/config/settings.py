@@ -10,10 +10,11 @@ from dotenv import load_dotenv
 # ==============================================================================
 # CARGA DE VARIABLES DE ENTORNO
 # ==============================================================================
-# Buscamos el archivo .env en la raíz del espacio de trabajo
 BASE_DIR = Path(__file__).resolve().parent.parent
-WORKSPACE_DIR = BASE_DIR.parent
-ENV_PATH = WORKSPACE_DIR / '.env'
+
+# Forzamos la búsqueda del .env en la misma carpeta que manage.py
+ENV_PATH = BASE_DIR / '.env'
+load_dotenv(ENV_PATH)
 
 # Cargamos el archivo usando la librería segura python-dotenv
 if ENV_PATH.exists():
